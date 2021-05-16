@@ -661,8 +661,8 @@ done
 PERMISSIONS="600";
 
 for DIR in $(cat /etc/passwd | egrep -v '(root|halt|sync|shutdown)' | awk -F: '($7 != "/usr/sbin/nologin" && $7 != "/bin/false" && $7 !="/nonexistent" ) { print $6 }'); do
-	for FILE in $DIR/.netrc; do
-		if [[ ! -h "$FILE" -a -f "$FILE" ]]; then
+	for FILE in "$DIR/.netrc"; do
+		if [ ! -h "$FILE" -a -f "$FILE" ]; then
 			file_has_correct_permissions "$FILE" $PERMISSIONS;
 
 			if [[ $FNRET != 0 ]]; then
@@ -831,7 +831,7 @@ PURGE_PACKAGES=(
 	"rlinetd"
 	"udhcpd"
 	"isc-dhcp-server"
-	"libcups2"
+#	"libcups2"
 	"libcupscgi1"
 	"libcupsimage2"
 	"libcupsmime1"
@@ -909,9 +909,9 @@ for i in ${!PURGE_PACKAGES[@]}; do
 
 	is_pkg_installed "$PACKAGE";
 
-	if [[ $FNRET = 0 ]]; then
-		apt_purge "$PACKAGE";
-	fi
+	# if [[ $FNRET = 0 ]]; then
+	# 	apt_purge "$PACKAGE";
+	# fi
 done
 
 logger "Purged ${#PURGE_PACKAGES[@]} packages";
@@ -1129,7 +1129,7 @@ for AUDIT_VALUE in $AUDIT_PARAMS1; do
 	file_does_pattern_exist $FILE "$AUDIT_VALUE";
 
 	if [[ $FNRET != 0 ]]; then
-		add_end_of_file $FILE "$AUDIT_VALUE";
+		append_to_file $FILE "$AUDIT_VALUE";
 		eval $(pkill -HUP -P 1 auditd);
 	fi
 done
@@ -1803,7 +1803,7 @@ FILE='/etc/profile.d/CIS_10.4_umask.sh';
 SEARCH_RES=0;
 
 for FILE_SEARCHED in $FILES_TO_SEARCH; do
-	if ][ $SEARCH_RES = 1 ]]; then break; fi
+	if [[ $SEARCH_RES = 1 ]]; then break; fi
 
 	if test -d "$FILE_SEARCHED"; then
 		for file_in_dir in $(ls "$FILE_SEARCHED"); do
@@ -2182,7 +2182,7 @@ FILENAME=".rhosts";
 
 for DIR in $(cat /etc/passwd | egrep -v '(root|halt|sync|shutdown)' | awk -F: '($7 != "/usr/sbin/nologin" && $7 != "/bin/false" && $7 !="/nonexistent" ) { print $6 }'); do
 	for FILE in $DIR/$FILENAME; do
-		if [[ ! -h "$FILE" -a -f "$FILE" ]]; then
+		if [ ! -h "$FILE" -a -f "$FILE" ]; then
 			ERRORS=$((ERRORS+1));
 		fi
 	done
@@ -2199,7 +2199,7 @@ FILENAME='.netrc';
 
 for DIR in $(cat /etc/passwd | egrep -v '(root|halt|sync|shutdown)' | awk -F: '($7 != "/usr/sbin/nologin" && $7 != "/bin/false" && $7 !="/nonexistent" ) { print $6 }'); do
 	for FILE in $DIR/$FILENAME; do
-		if [[ ! -h "$FILE" -a -f "$FILE" ]]; then
+		if [ ! -h "$FILE" -a -f "$FILE" ]; then
 			ERRORS=$((ERRORS+1));
 		fi
 	done
@@ -2216,7 +2216,7 @@ FILENAME='.forward';
 
 for DIR in $(cat /etc/passwd | egrep -v '(root|halt|sync|shutdown)' | awk -F: '($7 != "/usr/sbin/nologin" && $7 != "/bin/false" && $7 !="/nonexistent" ) { print $6 }'); do
 	for FILE in $DIR/$FILENAME; do
-		if [[ ! -h "$FILE" -a -f "$FILE" ]]; then
+		if [ ! -h "$FILE" -a -f "$FILE" ]; then
 			ERRORS=$((ERRORS+1));
 		fi
 	done
@@ -2250,7 +2250,7 @@ for LINE in $RESULT; do
 	USERID=$(awk -F: {'print $2'} <<< "$LINE");
 	DIR=$(awk -F: {'print $3'} <<< "$LINE");
 
-	if [[ $USERID -ge 1000 -a ! -d "$DIR" -a $USER != "nfsnobody" -a $USER != "nobody" ]]; then
+	if [ $USERID -ge 1000 -a ! -d "$DIR" -a $USER != "nfsnobody" -a $USER != "nobody" ]; then
 		logger "\e[91mThe home directory ($DIR) of user $USER is not present\e[39m";
 
 		ERRORS=$((ERRORS+1));
