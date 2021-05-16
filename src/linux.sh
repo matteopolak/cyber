@@ -1,5 +1,5 @@
 #!/bin/bash
-
+ 
 VERSION="1-DEBIAN";
 
 GRUB_PASSWORD="grubpassword";
