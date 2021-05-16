@@ -2241,6 +2241,9 @@ fi
 ERRORS=0;
 RESULT=$(cat /etc/passwd | awk -F: '{ print $1 ":" $3 ":" $6 }');
 
+d_IFS=$IFS;
+IFS=$'\n';
+
 for LINE in $RESULT; do
 	USER=$(awk -F: {'print $1'} <<< "$LINE");
 	USERID=$(awk -F: {'print $2'} <<< "$LINE");
@@ -2340,6 +2343,8 @@ if [[ $ERRORS -eq 0 ]]; then
 	logger "\e[32mNo duplicate group names found\e[39m";
 	echo "No duplicate group names" >> $DUPLICATES_FILE;
 fi
+
+IFS=$d_IFS;
 
 ERRORS=0;
 FILEGROUP='/etc/group';
