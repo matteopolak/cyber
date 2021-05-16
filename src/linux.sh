@@ -2634,10 +2634,10 @@ rkhunter --propupd >> /dev/null;
 rkhunter --check --nocolors --skip-keypress >> rkhunter.txt 2>&1;
 
 logger "Scanning with Tiger, this may take a while...";
-tiger -e > tiger.txt 2>&1;
+# tiger -e > tiger.txt 2>&1;
 
 logger "Scanning with ClamAV, this may take a while...";
-clamscan --remove --quiet -oir / > clam.txt 2>&1;
+# clamscan --remove --quiet -oir / > clam.txt 2>&1;
 
 logger "Running LogWatch...";
 logwatch >> $LOG_FILE 2>&1;
