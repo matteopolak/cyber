@@ -101,7 +101,7 @@ function has_sysctl_param_expected_result {
 
 	if [[ "$(sysctl "$SYSCTL_PARAM" 2>/dev/null)" = "$SYSCTL_PARAM = $EXP_RESULT" ]]; then
 		FNRET=0;
-	elif [[ $? = 255 ]]; then
+	elif [[ $? -eq 255 ]]; then
 		FNRET=255;
 	else
 		FNRET=1;
@@ -114,7 +114,7 @@ function sysctl_set_param {
 
 	if [[ "$(sysctl -w "$SYSCTL_PARAM"="$VALUE" 2>/dev/null)" = "$SYSCTL_PARAM = $VALUE" ]]; then
 		FNRET=0;
-	elif [[ $? = 255 ]]; then
+	elif [[ $? -eq 255 ]]; then
 		FNRET=255;
 	else
 		FNRET=1;
@@ -513,9 +513,7 @@ for i in ${!INSTALL_PACKAGES[@]}; do
 	PACKAGE=${INSTALL_PACKAGES[$i]};
 	logger "Installing packages... ("$(($i + 1))"/${#INSTALL_PACKAGES[@]}) - $PACKAGE" 1;
 
-	if [[ $FNRET != 0 ]]; then
-		apt_install "$PACKAGE";
-	fi
+	apt_install "$PACKAGE";
 done
 
 echo "";
@@ -579,14 +577,14 @@ for i in ${!PARTITIONS[@]}; do
 	is_a_partition "$PARTITION";
 
 	if [[ "$OPTION" != "-" ]]; then
-		if [[ $FNRET = 1 ]]; then
+		if [[ $FNRET -eq 1 ]]; then
 			mount "$PARTITION" >> $LOG_FILE 2>&1;
 		fi
 	else
-		if [[ $FNRET = 1 ]]; then
+		if [[ $FNRET -eq 1 ]]; then
 			add_option_to_fstab "$PARTITION" "$OPTION";
 			remount_partition "$PARTITION";
-		elif [[ $FNRET = 3 ]]; then
+		elif [[ $FNRET -eq 3 ]]; then
 			remount_partition "$PARTITION";
 		fi
 	fi
@@ -665,7 +663,7 @@ for DIR in $(cat /etc/passwd | egrep -v '(root|halt|sync|shutdown)' | awk -F: '(
 		if [ ! -h "$FILE" -a -f "$FILE" ]; then
 			file_has_correct_permissions "$FILE" $PERMISSIONS;
 
-			if [[ $FNRET != 0 ]]; then
+			if [[ $FNRET -ne 0 ]]; then
 				chmod 600 "$FILE";
 			fi
 		fi
@@ -718,7 +716,7 @@ for i in ${!KERNEL_OPTIONS[@]}; do
 
 	is_kernel_option_enabled "$KERNEL_OPTION";
 
-	if [[ $FNRET = 0 ]]; then
+	if [[ $FNRET -eq 0 ]]; then
 		ERRORS=$((ERRORS+1))
 	fi
 
@@ -803,7 +801,7 @@ for i in ${!SYSCTL_PARAMS[@]}; do
 	SYSCTL_EXP_RESULT=${SYSCTL_EXP_RESULTS[$i]};
 
 	has_sysctl_param_expected_result "$SYSCTL_PARAM" "$SYSCTL_EXP_RESULT";
-	if [[ $FNRET != 0 ]]; then
+	if [[ $FNRET -ne 0 ]]; then
 		sysctl_set_param "$SYSCTL_PARAM" "$SYSCTL_EXP_RESULT";
 	fi 
 
@@ -831,21 +829,21 @@ PURGE_PACKAGES=(
 	"rlinetd"
 	"udhcpd"
 	"isc-dhcp-server"
-#	"libcups2"
-	"libcupscgi1"
-	"libcupsimage2"
-	"libcupsmime1"
-	"libcupsppdc1"
-	"cups-common"
-	"cups-client"
-	"cups-ppdc"
-	"libcupsfilters1"
-	"cups-filters"
-	"cups"
-	"avahi-daemon"
-	"libavahi-common-data"
-	"libavahi-common3"
-	"libavahi-core7"
+	#	"libcups2"
+	#	"libcupscgi1"
+	#	"libcupsimage2"
+	#	"libcupsmime1"
+	#	"libcupsppdc1"
+	#	"cups-common"
+	#	"cups-client"
+	#	"cups-ppdc"
+	#	"libcupsfilters1"
+	#	"cups-filters"
+	#	"cups"
+	#	"avahi-daemon"
+	#	"libavahi-common-data"
+	#	"libavahi-common3"
+	#	"libavahi-core7"
 	# "xserver-xorg-core"
 	# "xserver-xorg-core-dbg"
 	# "xserver-common"
@@ -909,9 +907,9 @@ for i in ${!PURGE_PACKAGES[@]}; do
 
 	is_pkg_installed "$PACKAGE";
 
-	# if [[ $FNRET = 0 ]]; then
-	# 	apt_purge "$PACKAGE";
-	# fi
+	if [[ $FNRET -eq 0 ]]; then
+		apt_purge "$PACKAGE";
+	fi
 done
 
 logger "Purged ${#PURGE_PACKAGES[@]} packages";
@@ -988,16 +986,16 @@ for i in ${!MASTER_PACKAGES[@]}; do
 	for PACKAGE in $PACKAGES; do
 		is_pkg_installed "$PACKAGE";
 
-		if [[ $FNRET = 0 ]]; then
+		if [[ $FNRET -eq 0 ]]; then
 			apt-get purge "$PACKAGE" -y >> $DOWNLOADS_FILE;
 		fi
 
 		check_file_existance "$FILE";
 
-		if [[ $FNRET = 0 ]]; then
+		if [[ $FNRET -eq 0 ]]; then
 			file_does_pattern_exist "$FILE" "$PATTERN";
 
-			if [[ $FNRET = 0 ]]; then
+			if [[ $FNRET -eq 0 ]]; then
 				backup_file "$FILE";
 				ESCAPED_PATTERN=$(sed "s/|\|(\|)/\\\&/g" <<< "$PATTERN");
 				sed -ie "s/$ESCAPED_PATTERN/#&/g" "$FILE";
@@ -1032,10 +1030,10 @@ for i in ${!MASTER_PATTERNS[@]}; do
 
 	check_file_existance $FILE;
 
-	if [[ $FNRET = 0 ]]; then
+	if [[ $FNRET -eq 0 ]]; then
 		file_does_pattern_exist $FILE "$PATTERN";
 
-		if [[ $FNRET = 0 ]]; then
+		if [[ $FNRET -eq 0 ]]; then
 			backup_file $FILE;
 			ESCAPED_PATTERN=$(sed "s/|\|(\|)/\\\&/g" <<< "$PATTERN");
 			sed -ie "s/$ESCAPED_PATTERN/#&/g" $FILE;
@@ -1111,7 +1109,7 @@ for i in ${!AUDIT_PARAMS[@]}; do
 
 	file_does_pattern_exist $FILE "$AUDIT_VALUE";
 
-	if [[ $FNRET != 0 ]]; then
+	if [[ $FNRET -ne 0 ]]; then
 		append_to_file $FILE "$AUDIT_VALUE";
 		eval $(pkill -HUP -P 1 auditd);
 	fi
@@ -1128,7 +1126,7 @@ FILE='/etc/audit/audit.rules';
 for AUDIT_VALUE in $AUDIT_PARAMS1; do
 	file_does_pattern_exist $FILE "$AUDIT_VALUE";
 
-	if [[ $FNRET != 0 ]]; then
+	if [[ $FNRET -ne 0 ]]; then
 		append_to_file $FILE "$AUDIT_VALUE";
 		eval $(pkill -HUP -P 1 auditd);
 	fi
@@ -1256,7 +1254,7 @@ LIMIT_PATTERN='^\*[[:space:]]*hard[[:space:]]*core[[:space:]]*0$';
 
 file_does_pattern_exist $LIMIT_FILE "$LIMIT_PATTERN";
 
-if [[ $FNRET != 0 ]]; then
+if [[ $FNRET -ne 0 ]]; then
 	append_to_file $LIMIT_FILE "* hard core 0"
 fi
 
@@ -1268,13 +1266,13 @@ NTP_INIT_FILE='/etc/init.d/ntp';
 
 file_does_pattern_exist $NTP_CONF_FILE "$NTP_CONF_DEFAULT_PATTERN";
 
-if [[ $FNRET != 0 ]]; then
+if [[ $FNRET -ne 0 ]]; then
 	append_to_file $NTP_CONF_FILE "restrict -4 default kod notrap nomodify nopeer noquery";
 fi
 
 file_does_pattern_exist $NTP_INIT_FILE "^$NTP_INIT_PATTERN";
 
-if [[ $FNRET != 0 ]]; then
+if [[ $FNRET -ne 0 ]]; then
 	file_addline_before_pattern $NTP_INIT_FILE $NTP_INIT_PATTERN "^UGID";
 fi
 
@@ -1285,10 +1283,10 @@ RSYNC_DEFAULT_PATTERN_TO_SEARCH='RSYNC_ENABLE=true';
 
 is_pkg_installed $PACKAGE;
 
-if [[ $FNRET = 0 ]]; then
+if [[ $FNRET -eq 0 ]]; then
 	file_does_pattern_exist $RSYNC_DEFAULT_FILE "^$RSYNC_DEFAULT_PATTERN";
 
-	if [[ $FNRET != 0 ]]; then
+	if [[ $FNRET -ne 0 ]]; then
 		replace_in_file $RSYNC_DEFAULT_FILE $RSYNC_DEFAULT_PATTERN_TO_SEARCH $RSYNC_DEFAULT_PATTERN;
 	fi
 fi
@@ -1298,7 +1296,7 @@ FILE='/etc/hosts.allow'
 
 check_file_existance $FILE;
 
-if [[ $FNRET != 0 ]]; then
+if [[ $FNRET -ne 0 ]]; then
 	touch $FILE;
 fi
 
@@ -1307,7 +1305,7 @@ PERMISSIONS='644';
 
 file_has_correct_permissions $FILE $PERMISSIONS;
 
-if [[ $FNRET != 0 ]]; then
+if [[ $FNRET -ne 0 ]]; then
 	chmod 0$PERMISSIONS $FILE;
 fi
 
@@ -1316,13 +1314,13 @@ PATTERN='ALL: ALL'
 
 check_file_existance $FILE;
 
-if [[ $FNRET != 0 ]]; then
+if [[ $FNRET -ne 0 ]]; then
 	touch $FILE;
 fi
 
 file_does_pattern_exist $FILE "$PATTERN";
 
-if [[ $FNRET != 0 ]]; then
+if [[ $FNRET -ne 0 ]]; then
 	append_to_file $FILE "$PATTERN";
 fi
 
@@ -1331,7 +1329,7 @@ PERMISSIONS='644';
 
 file_has_correct_permissions $FILE $PERMISSIONS;
 
-if [[ $FNRET != 0 ]]; then
+if [[ $FNRET -ne 0 ]]; then
 	chmod 0$PERMISSIONS $FILE;
 fi
 
@@ -1341,13 +1339,13 @@ VALUE=5;
 
 check_file_existance $FILE;
 
-if [[ $FNRET != 0 ]]; then
+if [[ $FNRET -ne 0 ]]; then
 	touch $FILE;
 fi
 
 file_does_pattern_exist $FILE "^$PATTERN[[:space:]]";
 
-if [[ $FNRET != 0 ]]; then
+if [[ $FNRET -ne 0 ]]; then
 	append_to_file $FILE "$PATTERN = $VALUE";
 fi
 
@@ -1356,7 +1354,7 @@ OPTIONS='space_left_action=email action_mail_acct=root admin_space_left_action=h
 
 check_file_existance $FILE;
 
-if [[ $FNRET != 0 ]]; then
+if [[ $FNRET -ne 0 ]]; then
 	touch $FILE;
 fi
 
@@ -1367,10 +1365,10 @@ for AUDIT_OPTION in $OPTIONS; do
 
 	file_does_pattern_exist $FILE "$PATTERN";
 
-	if [[ $FNRET != 0 ]]; then
+	if [[ $FNRET -ne 0 ]]; then
 		file_does_pattern_exist $FILE "^$AUDIT_PARAM";
 
-		if [[ $FNRET != 0 ]]; then
+		if [[ $FNRET -ne 0 ]]; then
 			append_to_file $FILE "$AUDIT_PARAM = $AUDIT_VALUE";
 		else
 			replace_in_file $FILE "^$AUDIT_PARAM[[:space:]]*=.*" "$AUDIT_PARAM = $AUDIT_VALUE";
@@ -1383,7 +1381,7 @@ OPTIONS='max_log_file_action=keep_logs';
 
 check_file_existance $FILE;
 
-if [[ $FNRET != 0 ]]; then
+if [[ $FNRET -ne 0 ]]; then
 	touch $FILE;
 fi
 
@@ -1394,10 +1392,10 @@ for AUDIT_OPTION in $OPTIONS; do
 
 	file_does_pattern_exist $FILE "$PATTERN";
 
-	if [[ $FNRET != 0 ]]; then
+	if [[ $FNRET -ne 0 ]]; then
 		file_does_pattern_exist $FILE "^$AUDIT_PARAM";
 
-		if [[ $FNRET != 0 ]]; then
+		if [[ $FNRET -ne 0 ]]; then
 			append_to_file $FILE "$AUDIT_PARAM = $AUDIT_VALUE";
 		else
 			replace_in_file $FILE "^$AUDIT_PARAM[[:space:]]*=.*" "$AUDIT_PARAM = $AUDIT_VALUE";
@@ -1410,7 +1408,7 @@ SERVICE_NAME='auditd';
 
 is_service_enabled $SERVICE_NAME;
 
-if [[ $FNRET != 0 ]]; then
+if [[ $FNRET -ne 0 ]]; then
 	update-rc.d $SERVICE_NAME remove >	/dev/null 2>&1;
 	update-rc.d $SERVICE_NAME defaults > /dev/null 2>&1;
 fi
@@ -1420,7 +1418,7 @@ OPTIONS='GRUB_CMDLINE_LINUX="audit=1"';
 
 check_file_existance $FILE;
 
-if [[ $FNRET != 0 ]]; then
+if [[ $FNRET -ne 0 ]]; then
 	touch $FILE;
 fi
 
@@ -1431,10 +1429,10 @@ for GRUB_OPTION in $OPTIONS; do
 
 	file_does_pattern_exist $FILE "$PATTERN";
 
-	if [[ $FNRET != 0 ]]; then
+	if [[ $FNRET -ne 0 ]]; then
 		file_does_pattern_exist $FILE "^$GRUB_PARAM";
 
-		if [[ $FNRET != 0 ]]; then
+		if [[ $FNRET -ne 0 ]]; then
 			append_to_file $FILE "$GRUB_PARAM = $GRUB_VALUE";
 		else
 			replace_in_file $FILE "^$GRUB_PARAM=.*" "$GRUB_PARAM=$GRUB_VALUE";
@@ -1446,7 +1444,7 @@ SERVICE_NAME="syslog-ng";
 
 is_service_enabled $SERVICE_NAME;
 
-if [[ $FNRET != 0 ]]; then
+if [[ $FNRET -ne 0 ]]; then
 	update-rc.d $SERVICE_NAME remove > /dev/null 2>&1;
 	update-rc.d $SERVICE_NAME defaults > /dev/null 2>&1;
 fi
@@ -1460,19 +1458,19 @@ FILES=$(grep "file(" $SYSLOG_BASEDIR/syslog-ng.conf | grep '"' | cut -d'"' -f 2)
 for FILE in $FILES; do
 	check_file_existance "$FILE";
 
-	if [[ $FNRET != 0 ]]; then
+	if [[ $FNRET -ne 0 ]]; then
 		touch "$FILE";
 	fi
 
 	file_has_correct_ownership "$FILE" $USER $GROUP;
 
-	if [[ $FNRET != 0 ]]; then
+	if [[ $FNRET -ne 0 ]]; then
 		chown $USER:$GROUP "$FILE"
 	fi
 
 	file_has_correct_permissions "$FILE" $PERMISSIONS;
 
-	if [[ $FNRET != 0 ]]; then
+	if [[ $FNRET -ne 0 ]]; then
 		chmod 0$PERMISSIONS "$FILE";
 	fi
 done
@@ -1482,7 +1480,7 @@ PATTERN='tripwire --check';
 
 file_does_pattern_exist "$FILES" "$PATTERN";
 
-if [[ $FNRET != 0 ]]; then
+if [[ $FNRET -ne 0 ]]; then
 	echo "0 10 * * * root /usr/sbin/tripwire --check > /dev/shm/tripwire_check 2>&1 " > /etc/cron.d/CIS_8.3.2_tripwire;
 fi
 
@@ -1493,19 +1491,19 @@ GROUP='root';
 
 check_file_existance $FILE;
 
-if [[ $FNRET != 0 ]]; then
+if [[ $FNRET -ne 0 ]]; then
 	touch $FILE;
 fi
 
 file_has_correct_ownership $FILE $USER $GROUP;
 
-if [[ $FNRET != 0 ]]; then
+if [[ $FNRET -ne 0 ]]; then
 	chown $USER:$GROUP $FILE
 fi
 
 file_has_correct_permissions $FILE $PERMISSIONS;
 
-if [[ $FNRET != 0 ]]; then
+if [[ $FNRET -ne 0 ]]; then
 	chmod 0$PERMISSIONS $FILE;
 fi
 
@@ -1516,19 +1514,19 @@ GROUP='root';
 
 check_file_existance $FILE;
 
-if [[ $FNRET != 0 ]]; then
+if [[ $FNRET -ne 0 ]]; then
 	touch $FILE;
 fi
 
 file_has_correct_ownership $FILE $USER $GROUP;
 
-if [[ $FNRET != 0 ]]; then
+if [[ $FNRET -ne 0 ]]; then
 	chown $USER:$GROUP $FILE;
 fi
 
 file_has_correct_permissions $FILE $PERMISSIONS;
 
-if [[ $FNRET != 0 ]]; then
+if [[ $FNRET -ne 0 ]]; then
 	chmod 0$PERMISSIONS $FILE;
 fi
 
@@ -1539,21 +1537,19 @@ GROUP='root';
 
 check_file_existance $FILE;
 
-asdasdasd
-
-if [[ $FNRET != 0 ]]; then
+if [[ $FNRET -ne 0 ]]; then
 	touch $FILE;
 fi
 
 file_has_correct_ownership $FILE $USER $GROUP;
 
-if [[ $FNRET != 0 ]]; then
+if [[ $FNRET -ne 0 ]]; then
 	chown $USER:$GROUP $FILE;
 fi
 
 file_has_correct_permissions $FILE $PERMISSIONS;
 
-if [[ $FNRET != 0 ]]; then
+if [[ $FNRET -ne 0 ]]; then
 	chmod 0$PERMISSIONS $FILE;
 fi
 
@@ -1564,19 +1560,19 @@ GROUP='root';
 
 check_file_existance $FILE;
 
-if [[ $FNRET != 0 ]]; then
+if [[ $FNRET -ne 0 ]]; then
 	touch $FILE;
 fi
 
 file_has_correct_ownership $FILE $USER $GROUP;
 
-if [[ $FNRET != 0 ]]; then
+if [[ $FNRET -ne 0 ]]; then
 	chown $USER:$GROUP $FILE
 fi
 
 file_has_correct_permissions $FILE $PERMISSIONS;
 
-if [[ $FNRET != 0 ]]; then
+if [[ $FNRET -ne 0 ]]; then
 	chmod 0$PERMISSIONS $FILE
 fi
 
@@ -1587,19 +1583,19 @@ GROUP='root';
 
 check_file_existance $FILE;
 
-if [[ $FNRET != 0 ]]; then
+if [[ $FNRET -ne 0 ]]; then
 	touch $FILE;
 fi
 
 file_has_correct_ownership $FILE $USER $GROUP;
 
-if [[ $FNRET != 0 ]]; then
+if [[ $FNRET -ne 0 ]]; then
 	chown $USER:$GROUP $FILE;
 fi
 
 file_has_correct_permissions $FILE $PERMISSIONS;
 
-if [[ $FNRET != 0 ]]; then
+if [[ $FNRET -ne 0 ]]; then
 	chmod 0$PERMISSIONS $FILE
 fi
 
@@ -1610,19 +1606,19 @@ GROUP='root';
 
 check_file_existance $FILE;
 
-if [[ $FNRET != 0 ]]; then
+if [[ $FNRET -ne 0 ]]; then
 	touch $FILE;
 fi
 
 file_has_correct_ownership $FILE $USER $GROUP;
 
-if [[ $FNRET != 0 ]]; then
+if [[ $FNRET -ne 0 ]]; then
 	chown $USER:$GROUP $FILE;
 fi
 
 file_has_correct_permissions $FILE $PERMISSIONS;
 
-if [[ $FNRET != 0 ]]; then
+if [[ $FNRET -ne 0 ]]; then
 	chmod 0$PERMISSIONS $FILE;
 fi
 
@@ -1635,19 +1631,19 @@ GROUP='root';
 for FILE in $FILES_PRESENT; do
 	check_file_existance "$FILE";
 	
-	if [[ $FNRET != 0 ]]; then
+	if [[ $FNRET -ne 0 ]]; then
 		touch "$FILE";
 	fi
 
 	file_has_correct_ownership "$FILE" $USER $GROUP;
 
-	if [[ $FNRET != 0 ]]; then
+	if [[ $FNRET -ne 0 ]]; then
 		chown $USER:$GROUP "$FILE";
 	fi
 
 	file_has_correct_permissions "$FILE" $PERMISSIONS;
 
-	if [[ $FNRET != 0 ]]; then
+	if [[ $FNRET -ne 0 ]]; then
 		chmod 0$PERMISSIONS "$FILE";
 	fi
 done
@@ -1658,7 +1654,7 @@ FILE='/etc/pam.d/common-password';
 
 file_does_pattern_exist $FILE "$PATTERN";
 
-if [[ $FNRET != 0 ]]; then
+if [[ $FNRET -ne 0 ]]; then
 	file_addline_before_pattern $FILE "password	requisite			 pam_cracklib.so retry=3 minlen=8 difok=3" "# pam-auth-update(8) for details.";
 fi 
 
@@ -1668,7 +1664,7 @@ FILE='/etc/pam.d/login';
 
 file_does_pattern_exist $FILE "$PATTERN";
 
-if [[ $FNRET != 0 ]]; then
+if [[ $FNRET -ne 0 ]]; then
 	file_addline_before_pattern $FILE "auth	required	pam_tally.so onerr=fail deny=6 unlock_time=1800" "# Uncomment and edit \/etc\/security\/time.conf if you need to set";
 fi 
 
@@ -1678,7 +1674,7 @@ FILE='/etc/pam.d/common-password';
 
 file_does_pattern_exist $FILE "$PATTERN";
 
-if [[ $FNRET != 0 ]]; then
+if [[ $FNRET -ne 0 ]]; then
 	file_addline_before_pattern $FILE "password [success=1 default=ignore] pam_unix.so obscure sha512 remember=5" "# pam-auth-update(8) for details.";
 fi 
 
@@ -1693,10 +1689,10 @@ for SSH_OPTION in $OPTIONS; do
 
 		file_does_pattern_exist $FILE "$PATTERN";
 
-		if [[ $FNRET != 0 ]]; then
+		if [[ $FNRET -ne 0 ]]; then
 			file_does_pattern_exist $FILE "^$SSH_PARAM";
 
-			if [[ $FNRET != 0 ]]; then
+			if [[ $FNRET -ne 0 ]]; then
 				append_to_file $FILE "$SSH_PARAM $SSH_VALUE";
 			else
 				replace_in_file $FILE "^$SSH_PARAM[[:space:]]*.*" "$SSH_PARAM $SSH_VALUE";
@@ -1717,10 +1713,10 @@ for SSH_OPTION in $OPTIONS; do
 
 		file_does_pattern_exist $FILE "$PATTERN";
 
-		if [[ $FNRET != 0 ]]; then
+		if [[ $FNRET -ne 0 ]]; then
 			file_does_pattern_exist $FILE "^$SSH_PARAM";
 
-			if [[ $FNRET != 0 ]]; then
+			if [[ $FNRET -ne 0 ]]; then
 				append_to_file $FILE "$SSH_PARAM $SSH_VALUE";
 			else
 				replace_in_file $FILE "^$SSH_PARAM[[:space:]]*.*" "$SSH_PARAM $SSH_VALUE";
@@ -1737,19 +1733,19 @@ GROUP='root';
 
 check_file_existance $FILE;
 
-if [[ $FNRET != 0 ]]; then
+if [[ $FNRET -ne 0 ]]; then
 	touch $FILE;
 fi
 
 file_has_correct_ownership $FILE $USER $GROUP;
 
-if [[ $FNRET != 0 ]]; then
+if [[ $FNRET -ne 0 ]]; then
 	chown $USER:$GROUP $FILE;
 fi
 
 file_has_correct_permissions $FILE $PERMISSIONS;
 
-if [[ $FNRET != 0 ]]; then
+if [[ $FNRET -ne 0 ]]; then
 	chmod 0$PERMISSIONS $FILE
 fi
 
@@ -1759,7 +1755,7 @@ FILE='/etc/pam.d/su';
 
 file_does_pattern_exist $FILE "$PATTERN";
 
-if [[ $FNRET != 0 ]]; then
+if [[ $FNRET -ne 0 ]]; then
 	file_addline_before_pattern $FILE "auth		 required	 pam_wheel.so" "# Uncomment this if you want wheel members to be able to";
 fi 
 
@@ -1791,7 +1787,7 @@ IFS=$d_IFS;
 USER='root';
 EXPECTED_GID='0';
 
-if [[ $(grep "^root:" /etc/passwd | cut -f4 -d:) != 0 ]]; then
+if [[ $(grep "^root:" /etc/passwd | cut -f4 -d:) -ne 0 ]]; then
 	usermod -g $EXPECTED_GID $USER;
 fi
 
@@ -1803,13 +1799,13 @@ FILE='/etc/profile.d/CIS_10.4_umask.sh';
 SEARCH_RES=0;
 
 for FILE_SEARCHED in $FILES_TO_SEARCH; do
-	if [[ $SEARCH_RES = 1 ]]; then break; fi
+	if [[ $SEARCH_RES -eq 1 ]]; then break; fi
 
 	if test -d "$FILE_SEARCHED"; then
 		for file_in_dir in $(ls "$FILE_SEARCHED"); do
 			file_does_pattern_exist "$FILE_SEARCHED/$file_in_dir" "^$PATTERN";
 
-			if [[ $FNRET = 0 ]]; then
+			if [[ $FNRET -eq 0 ]]; then
 				SEARCH_RES=1;
 				break;
 			fi
@@ -1817,13 +1813,13 @@ for FILE_SEARCHED in $FILES_TO_SEARCH; do
 	else
 		file_does_pattern_exist "$FILE_SEARCHED" "^$PATTERN";
 
-		if [[ $FNRET = 0 ]]; then
+		if [[ $FNRET -eq 0 ]]; then
 			SEARCH_RES=1;
 		fi
 	fi
 done
 
-if [[ $SEARCH_RES = 0 ]]; then
+if [[ $SEARCH_RES -eq 0 ]]; then
 	touch $FILE;
 	chmod 644 $FILE;
 	append_to_file $FILE "$PATTERN";
@@ -1837,19 +1833,19 @@ FILES=("/etc/motd" "/etc/issue" "/etc/issue.net");
 for FILE in $FILES; do
 	check_file_existance "$FILE";
 
-	if [[ $FNRET != 0 ]]; then
+	if [[ $FNRET -ne 0 ]]; then
 		touch "$FILE" 
 	fi;
 
 	file_has_correct_ownership "$FILE" $USER $GROUP;
 
-	if [[ $FNRET != 0 ]]; then
+	if [[ $FNRET -ne 0 ]]; then
 		chown $USER:$GROUP "$FILE"
 	fi
 
 	file_has_correct_permissions "$FILE" $PERMISSIONS;
 
-	if [[ $FNRET != 0 ]]; then
+	if [[ $FNRET -ne 0 ]]; then
 		chmod 0$PERMISSIONS "$FILE"
 	fi
 done
@@ -1860,7 +1856,7 @@ PATTERN='(\\v|\\r|\\m|\\s)';
 for FILE in $FILES; do
 	file_does_pattern_exist "$FILE" "$PATTERN";
 
-	if [[ $FNRET = 0 ]]; then
+	if [[ $FNRET -eq 0 ]]; then
 		delete_line_in_file "$FILE" $PATTERN;
 	fi
 done
@@ -1870,7 +1866,7 @@ PERMISSIONS='644';
 
 file_has_correct_permissions $FILE $PERMISSIONS;
 
-if [[ $FNRET != 0 ]]; then
+if [[ $FNRET -ne 0 ]]; then
 	chmod 0$PERMISSIONS $FILE
 fi
 
@@ -1879,7 +1875,7 @@ PERMISSIONS='640';
 
 file_has_correct_permissions $FILE $PERMISSIONS;
 
-if [[ $FNRET != 0 ]]; then
+if [[ $FNRET -ne 0 ]]; then
 	chmod 0$PERMISSIONS $FILE
 fi
 
@@ -1888,7 +1884,7 @@ PERMISSIONS='644';
 
 file_has_correct_permissions $FILE $PERMISSIONS;
 
-if [[ $FNRET != 0 ]]; then
+if [[ $FNRET -ne 0 ]]; then
 	chmod 0$PERMISSIONS $FILE
 fi
 
@@ -1898,7 +1894,7 @@ GROUP='root';
 
 file_has_correct_ownership $FILE $USER $GROUP;
 
-if [[ $FNRET != 0 ]]; then
+if [[ $FNRET -ne 0 ]]; then
 	chown $USER:$GROUP $FILE
 fi
 
@@ -1908,7 +1904,7 @@ GROUP='shadow';
 
 file_has_correct_ownership $FILE $USER $GROUP;
 
-if [[ $FNRET != 0 ]]; then
+if [[ $FNRET -ne 0 ]]; then
 	chown $USER:$GROUP $FILE
 fi
 
@@ -1918,7 +1914,7 @@ GROUP='root';
 
 file_has_correct_ownership $FILE $USER $GROUP;
 
-if [[ $FNRET != 0 ]]; then
+if [[ $FNRET -ne 0 ]]; then
 	chown $USER:$GROUP $FILE;
 fi
 
@@ -1942,10 +1938,10 @@ fi
 
 dmesg_does_pattern_exist "$PATTERN";
 
-if [[ $FNRET != 0 ]]; then
+if [[ $FNRET -ne 0 ]]; then
 	is_nx_supported_and_enabled;
 
-	if [[ $FNRET != 0 ]]; then
+	if [[ $FNRET -ne 0 ]]; then
 		logger "$PATTERN is not present in dmesg and NX seems unsupported or disabled\n";
 		logger "\e[91mnoexec is unsupported or disabled\e[39m";
 	else
@@ -1972,7 +1968,7 @@ FILES="$SYSLOG_BASEDIR/syslog-ng.conf $SYSLOG_BASEDIR/conf.d/*";
 
 file_does_pattern_exist "$FILES" "$PATTERN";
 
-if [[ $FNRET != 0 ]]; then
+if [[ $FNRET -ne 0 ]]; then
 	logger "\e[91mPlease set a remote host to send your logs ($FILES)\e[39m";
 else
 	logger "\e[32mLogs are being sent to a remote host\e[39m";
@@ -1982,7 +1978,7 @@ KERNEL_OPTION="CONFIG_AUDIT";
 
 is_kernel_option_enabled "^$KERNEL_OPTION=";
 
-if [[ $FNRET = 0 ]]; then
+if [[ $FNRET -eq 0 ]]; then
 	logger "$KERNEL_OPTION is enabled\n";
 	logger "\e[32mKernel option $KERNEL_OPTION is enabled\e[39m";
 else
@@ -2171,7 +2167,7 @@ while [[ "${1:-}" != "" ]]; do
 	shift;
 done
 
-if [[ $ERRORS = 0 ]]; then
+if [[ $ERRORS -eq 0 ]]; then
 	logger "\e[91mRoot path is secure\e[39m";
 else
 	logger "\e[32mRoot path is not secure\e[39m";
@@ -2188,7 +2184,7 @@ for DIR in $(cat /etc/passwd | egrep -v '(root|halt|sync|shutdown)' | awk -F: '(
 	done
 done
 
-if [[ $ERRORS = 0 ]]; then
+if [[ $ERRORS -eq 0 ]]; then
 	logger "\e[32m$FILENAME is not present in any user's home directory\e[39m";
 else
 	logger "\e[91m$FILENAME is	present in at least one user's home directory\e[39m";
@@ -2205,7 +2201,7 @@ for DIR in $(cat /etc/passwd | egrep -v '(root|halt|sync|shutdown)' | awk -F: '(
 	done
 done
 
-if [[ $ERRORS = 0 ]]; then
+if [[ $ERRORS -eq 0 ]]; then
 	logger "\e[32m$FILENAME is not present in any user's home directory\e[39m";
 else
 	logger "\e[91m$FILENAME is	present in at least one user's home directory\e[39m";
@@ -2222,7 +2218,7 @@ for DIR in $(cat /etc/passwd | egrep -v '(root|halt|sync|shutdown)' | awk -F: '(
 	done
 done
 
-if [[ $ERRORS = 0 ]]; then
+if [[ $ERRORS -eq 0 ]]; then
 	logger "\e[32m$FILENAME is not present in any user's home directory\e[39m";
 else
 	logger "\e[91m$FILENAME is	present in at least one user's home directory\e[39m";
@@ -2236,7 +2232,7 @@ for GROUP in $(cut -s -d: -f4 /etc/passwd | sort -u ); do
 	fi
 done
 
-if [[ $ERRORS = 0 ]]; then
+if [[ $ERRORS -eq 0 ]]; then
 	logger "\e[32mpasswd and group groups are consistent\e[39m";
 else
 	logger "\e[91mpasswd and group groups are not consistent\e[39m";
@@ -2257,7 +2253,7 @@ for LINE in $RESULT; do
 	fi
 done
 
-if [[ $ERRORS = 0 ]]; then
+if [[ $ERRORS -eq 0 ]]; then
 	logger "\e[32mAll home directories are present\e[39m";
 fi
 
@@ -2268,7 +2264,7 @@ for LINE in $RESULT; do
 	OCC_NUMBER=$(awk -F: {'print $1'} <<< "$LINE");
 	USERID=$(awk -F: {'print $2'} <<< "$LINE");
 
-	if [[ $OCC_NUMBER -gt 1 ]]; then
+	if [ $OCC_NUMBER -gt 1 ]; then
 		USERS=$(awk -F: '($3 == n) { print $1 }' n="$USERID" /etc/passwd | xargs);
 		ERRORS=$((ERRORS+1));
 
@@ -2277,7 +2273,7 @@ for LINE in $RESULT; do
 	fi
 done 
 
-if [[ $ERRORS = 0 ]]; then
+if [[ $ERRORS -eq 0 ]]; then
 	logger "\e[32mNo duplicate UIDs found\e[39m";
 	echo "No duplicate UIDs" >> $DUPLICATES_FILE;
 fi
@@ -2289,7 +2285,7 @@ for LINE in $RESULT; do
 	OCC_NUMBER=$(awk -F: {'print $1'} <<< "$LINE");
 	GROUPID=$(awk -F: {'print $2'} <<< "$LINE");
 
-	if [[ $OCC_NUMBER -gt 1 ]]; then
+	if [ $OCC_NUMBER -gt 1 ]; then
 		USERS=$(awk -F: '($3 == n) { print $1 }' n="$GROUPID" /etc/passwd | xargs);
 		ERRORS=$((ERRORS+1));
 
@@ -2298,7 +2294,7 @@ for LINE in $RESULT; do
 	fi
 done 
 
-if [[ $ERRORS = 0 ]]; then
+if [[ $ERRORS -eq 0 ]]; then
 	logger "\e[32mNo duplicate GIDs found\e[39m";
 	echo "No duplicate GIDs" >> $DUPLICATES_FILE;
 fi 
@@ -2310,7 +2306,7 @@ for LINE in $RESULT; do
 	OCC_NUMBER=$(awk -F: {'print $1'} <<< "$LINE");
 	USERNAME=$(awk -F: {'print $2'} <<< "$LINE");
 
-	if [[ $OCC_NUMBER -gt 1 ]]; then
+	if [ $OCC_NUMBER -gt 1 ]; then
 		USERS=$(awk -F: '($3 == n) { print $1 }' n="$USERNAME" /etc/passwd | xargs);
 		ERRORS=$((ERRORS+1));
 
@@ -2319,7 +2315,7 @@ for LINE in $RESULT; do
 	fi
 done 
 
-if [[ $ERRORS = 0 ]]; then
+if [[ $ERRORS -eq 0 ]]; then
 	logger "\e[32mNo duplicate usernames found\e[39m";
 	echo "No duplicate usernames" >> $DUPLICATES_FILE;
 fi
@@ -2331,7 +2327,7 @@ for LINE in $RESULT; do
 	OCC_NUMBER=$(awk -F: {'print $1'} <<< "$LINE");
 	GROUPNAME=$(awk -F: {'print $2'} <<< "$LINE");
 
-	if [[ $OCC_NUMBER -gt 1 ]]; then
+	if [ $OCC_NUMBER -gt 1 ]; then
 		USERS=$(awk -F: '($3 == n) { print $1 }' n="$GROUPNAME" /etc/passwd | xargs);
 		ERRORS=$((ERRORS+1));
 		
@@ -2340,7 +2336,7 @@ for LINE in $RESULT; do
 	fi
 done 
 
-if [[ $ERRORS = 0 ]]; then
+if [[ $ERRORS -eq 0 ]]; then
 	logger "\e[32mNo duplicate group names found\e[39m";
 	echo "No duplicate group names" >> $DUPLICATES_FILE;
 fi
@@ -2351,7 +2347,7 @@ PATTERN='^shadow:x:[[:digit:]]+:';
 
 file_does_pattern_exist $FILEGROUP "$PATTERN";
 
-if [[ $FNRET = 0 ]]; then
+if [[ $FNRET -eq 0 ]]; then
 	RESULT=$(grep -E "$PATTERN" $FILEGROUP | cut -d: -f4);
 	GROUPID=$(getent group shadow | cut -d: -f3);
 
@@ -2380,13 +2376,13 @@ FILE='/etc/profile.d/CIS_99.1_timeout.sh';
 
 SEARCH_RES=0
 for FILE_SEARCHED in $FILES_TO_SEARCH; do
-	if [[ $SEARCH_RES = 1 ]]; then break; fi
+	if [[ $SEARCH_RES -eq 1 ]]; then break; fi
 
 	if test -d "$FILE_SEARCHED"; then
 		for file_in_dir in $(ls "$FILE_SEARCHED"); do
 			file_does_pattern_exist "$FILE_SEARCHED/$file_in_dir" "^$PATTERN";
 
-			if [[ $FNRET = 0 ]]; then
+			if [[ $FNRET -eq 0 ]]; then
 				SEARCH_RES=1;
 				break;
 			fi
@@ -2394,13 +2390,13 @@ for FILE_SEARCHED in $FILES_TO_SEARCH; do
 	else
 		file_does_pattern_exist "$FILE_SEARCHED" "^$PATTERN";
 
-		if [[ $FNRET = 0 ]]; then
+		if [[ $FNRET -eq 0 ]]; then
 			SEARCH_RES=1;
 		fi
 	fi
 done
 
-if [[ $SEARCH_RES = 0 ]]; then
+if [[ $SEARCH_RES -eq 0 ]]; then
 	touch $FILE;
 	chmod 644 $FILE;
 	append_to_file $FILE "$PATTERN$VALUE";
@@ -2416,13 +2412,13 @@ FILE='/etc/udev/rules.d/10-CIS_99.2_usb_devices.sh';
 SEARCH_RES=0;
 
 for FILE_SEARCHED in $FILES_TO_SEARCH; do
-	if [[ $SEARCH_RES = 1 ]]; then break; fi
+	if [[ $SEARCH_RES -eq 1 ]]; then break; fi
 
 	if test -d $FILE_SEARCHED; then
 		for file_in_dir in $(ls $FILE_SEARCHED); do
 			file_does_pattern_exist "$FILE_SEARCHED/$file_in_dir" "^$PATTERN";
 
-			if [[ $FNRET = 0 ]]; then
+			if [[ $FNRET -eq 0 ]]; then
 				SEARCH_RES=1;
 				break;
 			fi
@@ -2430,13 +2426,13 @@ for FILE_SEARCHED in $FILES_TO_SEARCH; do
 	else
 		file_does_pattern_exist "$FILE_SEARCHED" "^$PATTERN";
 
-		if [[ $FNRET = 0 ]]; then
+		if [[ $FNRET -eq 0 ]]; then
 			SEARCH_RES=1;
 		fi
 	fi
 done
 
-if [[ $SEARCH_RES = 0 ]]; then
+if [[ $SEARCH_RES -eq 0 ]]; then
 	touch $FILE;
 	chmod 644 $FILE;
 	append_to_file $FILE '
@@ -2533,10 +2529,10 @@ if [[ FNRET -eq 1 ]]; then
 			PATTERN="^$SSH_PARAM[[:space:]]*$SSH_VALUE";
 			file_does_pattern_exist "$FILE" "$PATTERN";
 
-			if [[ $FNRET != 0 ]]; then
+			if [[ $FNRET -ne 0 ]]; then
 				file_does_pattern_exist "$FILE" "^$SSH_PARAM";
 
-				if [[ $FNRET != 0 ]]; then
+				if [[ $FNRET -ne 0 ]]; then
 					append_to_file "$FILE" "$SSH_PARAM $SSH_VALUE";
 				else
 					replace_in_file "$FILE" "^$SSH_PARAM[[:space:]]*.*" "$SSH_PARAM $SSH_VALUE";
@@ -2650,7 +2646,7 @@ logger "Running full-upgrade..."
 apt_update;
 apt_full_upgrade;
 apt_autoremove;
-apt_clean;
+apt_autoclean;
 
 function display_time {
 	local T=$1
