@@ -50,7 +50,7 @@ function update_time {
 }
 
 function logger {
-	local MESSAGE=$1;
+	local MESSAGE="$1";
 	local NEW_LINE="\r";
 
 	if [[ $2 -eq 0 ]]; then
@@ -392,6 +392,10 @@ IFS=$d_IFS;
 # Disable the root user
 logger "Disabling root user...";
 passwd -l root >> $LOG_FILE 2>&1;
+
+# Disable guest account
+logger "Disabling guest account...";
+echo "allow-guest=false" >> /etc/lightdm/lightdm.conf;
 
 # Enable UFW
 logger "Enabling uncomplicated firewall...";
@@ -926,6 +930,10 @@ PURGE_PACKAGES=(
 	"unbound"
 	"rpcbind"
 	"nfs-kernel-server"
+	"netcat"
+	"nc"
+	"netcat-*"
+	"ophcrack"
 );
 
 logger "Purging packages... (0/${#PURGE_PACKAGES[@]})" 1;
@@ -1654,7 +1662,7 @@ fi
 
 FILES_ABSENT='/etc/cron.deny /etc/at.deny';
 FILES_PRESENT='/etc/cron.allow /etc/at.allow';
-PERMISSIONS='644';
+PERMISSIONS='400';
 USER='root';
 GROUP='root';
 
@@ -1685,7 +1693,7 @@ FILE='/etc/pam.d/common-password';
 file_does_pattern_exist $FILE "$PATTERN";
 
 if [[ $FNRET -ne 0 ]]; then
-	file_addline_before_pattern $FILE "password	requisite			 pam_cracklib.so retry=3 minlen=8 difok=3" "# pam-auth-update(8) for details.";
+	file_addline_before_pattern $FILE "password	requisite			 pam_cracklib.so retry=3 minlen=8 difok=3 dictcheck=1 maxsequence=5 maxrepeat=3 minclass=2" "# pam-auth-update(8) for details.";
 fi 
 
 PACKAGE='libpam-modules-bin';
@@ -1756,6 +1764,29 @@ for SSH_OPTION in $OPTIONS; do
 		fi
 done
 
+FILE='/etc/ssh';
+PERMISSIONS='444';
+USER='root';
+GROUP='root';
+
+check_file_existance $FILE;
+
+if [[ $FNRET -ne 0 ]]; then
+	touch $FILE;
+fi
+
+file_has_correct_ownership $FILE $USER $GROUP;
+
+if [[ $FNRET -ne 0 ]]; then
+	chown $USER:$GROUP $FILE >> $LOG_FILE 2>&1;
+fi
+
+file_has_correct_permissions $FILE $PERMISSIONS;
+
+if [[ $FNRET -ne 0 ]]; then
+	chmod -R 0$PERMISSIONS $FILE >> $LOG_FILE 2>&1;
+fi
+
 FILE='/etc/ssh/sshd_config';
 PERMISSIONS='600';
 USER='root';
@@ -1777,6 +1808,29 @@ file_has_correct_permissions $FILE $PERMISSIONS;
 
 if [[ $FNRET -ne 0 ]]; then
 	chmod 0$PERMISSIONS $FILE >> $LOG_FILE 2>&1;
+fi
+
+FILE='/var/log';
+PERMISSIONS='444';
+USER='root';
+GROUP='root';
+
+check_file_existance $FILE;
+
+if [[ $FNRET -ne 0 ]]; then
+	touch $FILE;
+fi
+
+file_has_correct_ownership $FILE $USER $GROUP;
+
+if [[ $FNRET -ne 0 ]]; then
+	chown $USER:$GROUP $FILE >> $LOG_FILE 2>&1;
+fi
+
+file_has_correct_permissions $FILE $PERMISSIONS;
+
+if [[ $FNRET -ne 0 ]]; then
+	chmod -R 0$PERMISSIONS $FILE >> $LOG_FILE 2>&1;
 fi
 
 PACKAGE='login';
@@ -2514,12 +2568,14 @@ if [[ FNRET -eq 1 ]]; then
 		"UsePAM=yes"
 		"Protocol=2"
 		"RhostsRSAAuthentication=no"
+		"RhostsAuthentication=no"
 		"LoginGraceTime=1m"
 		"SyslogFacility=AUTH"
 		"MaxStartups=5"
 		"PASS_WARN_AGE=7"
 		"PASS_MIN_DAYS=7"
 		"PASS_MAX_DAYS=90"
+		"PASS_MIN_LEN 8"
 	);
 
 	logger "Updating OpenSSH...";
@@ -2602,6 +2658,11 @@ if [[ FNRET -eq 1 ]]; then
 	apt_install apache2;
 
 	echo "";
+	logger "Configuring Apache2...";
+	echo "ServerSignature Off" >> /etc/apache2/apache2.conf;
+	echo "ServerTokens Prod" >> /etc/apache2/apache2.conf;
+
+	service apache2 restart >> $LOG_FILE 2>&1;
 else
 	# Apache2 not required, remove it.
 
@@ -2648,6 +2709,7 @@ else
 	# Samba not required, remove it.
 
 	logger "Removing Samba...";
+	service samba stop >> $LOG_FILE 2>&1;
 	apt_purge samba;
 fi
 
@@ -2659,14 +2721,14 @@ fi
 
 # RKHunter
 logger "Scanning with RKHunter, this may take a while...";
-rkhunter --update >> /dev/null;
-rkhunter --propupd >> /dev/null;
+rkhunter --update >> /dev/null 2>&1;
+rkhunter --propupd >> /dev/null 2>&1;
 rkhunter --check --nocolors --skip-keypress >> rkhunter.txt 2>&1;
 
 logger "Scanning with Tiger, this may take a while...";
-# tiger -e > tiger.txt 2>&1;
+tiger -e > tiger.txt 2>&1;
 
-logger "Scanning with ClamAV, this may take a while...";
+# logger "Scanning with ClamAV, this may take a while...";
 # clamscan --remove --quiet -oir / > clam.txt 2>&1;
 
 logger "Running LogWatch...";
@@ -2674,6 +2736,10 @@ logwatch >> $LOG_FILE 2>&1;
 
 logger "Setting up AppArmor...";
 apparmor_status > $APPARMOR_FILE 2>&1;
+
+logger "Configuring iptables...";
+iptables -A INPUT -p tcp --syn --dport 22 -m connlimit --connlimit-above 3 -j REJECT >> $LOG_FILE 2>&1;
+iptables -p tcp --syn --dport 80 -m connlimit --connlimit-above 20 --connlimit-mask 24 -j DROP >> $LOG_FILE 2>&1;
 
 # Update the distribution
 logger "Running full-upgrade..."
