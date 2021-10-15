@@ -1,6 +1,6 @@
 #!/bin/bash
  
-VERSION="1-DEBIAN";
+VERSION="1-UBUNTU";
 
 GRUB_PASSWORD="grubpassword";
 
@@ -364,9 +364,38 @@ get_response "What is the username of the main user?";
 
 MAIN_USER=$FNRET;
 
+d_IFS=$IFS;
+IFS=$'\n';
+USERS_INPUT_RAW=($(more README.desktop | grep -oP "(?<=^Exec=x-www-browser \")([^\"]+)" | xargs wget -qO- | grep -Pzo "<b>Authorized Administrators(.|\n)*?(?=<\/pre)"));
+is_admin=1;
+IFS=' ';
+
+USERS=();
+ADMINS=();
+
+for line in "${USERS_INPUT_RAW[@]}"; do
+	if [[ "$line" =~ ^...Authorized\ Users ]]; then
+		is_admin=0;
+	elif [[ "$line" =~ ^[a-z]+ ]]; then
+		username=$(echo $line | grep -Po "^[a-z]+");
+
+		if [ $is_admin -eq 1 ]; then
+			ADMINS+=("$username");
+		else
+			USERS+=("$username");
+		fi
+	fi
+done
+
+IFS=$d_IFS;
+
 # Disable the root user
 logger "Disabling root user...";
 passwd -l root >> $LOG_FILE 2>&1;
+
+# Enable UFW
+logger "Enabling uncomplicated firewall...";
+ufw enable >> $LOG_FILE 2>&1;
 
 # Update apt cache
 logger "Updating apt cache...";
@@ -382,91 +411,91 @@ apt_upgrade;
 #
 #################################
 
-yes_no "Would you like to go through the process of account management?";
+d_IFS=$IFS;
+IFS=' ';
+logger "Admins: ${ADMINS[@]}";
+logger "Users: ${USERS[@]}";
+yes_no "Are these accounts correct?";
+IFS=$d_IFS;
 
 if [[ $FNRET -eq 1 ]]; then
-	ALL_USERS=($(getent passwd {1000..60000} | grep -o "^[^:]*" | tr "\n" " "));
-
-	#README_URL=$(cat /home/$MAIN_USER/Desktop/README.desktop | grep -Po '(?<=Exec=x-www-browser ")[^"]*');
-	#ADMINS_USERS=($(python3 -c "import re;import urllib.request;f=urllib.request.urlopen('$README_URL');w=f.read().decode('utf-8');u=re.search('Authorized Users&#58;([\r\na-z]+)',w).group(1)[2:-2];a=re.findall('^([a-z]+)\s+',re.search('Authorized Administrators&#58;([\S\s]+?)Authorized Users&#58;',w).group(1),re.MULTILINE);print('-'.join(a)+' '+'-'.join(u.replace('\r','').split('\n')))"));
-	ADMINS_USERS=($(echo "ubuntu-anadmin otheruser1-otheruser2"));
-
-	IFS='-';
-	USERS=(${ADMINS_USERS[1]});
-	ADMINS=(${ADMINS_USERS[0]});
-	IFS=' ';
-
-	ALLOWED_USERS=("${USERS[@]} ${ADMINS[@]}");
-	TOTAL=${#ALLOWED_USERS[@]};
-
-	yes_no "Should unauthorized users be removed?";
+	yes_no "Would you like to go through the process of account management?";
 
 	if [[ $FNRET -eq 1 ]]; then
-		for USER in "${ALL_USERS[@]}"; do
-			if [[ ! "${ADMINS[@]}" =~ "${USER}" && ! "${USERS[@]}" =~ "${USER}" && ! "${MAIN_USER}" == "${USER}" ]]; then
-				yes_no "Remove user $USER?";
+		ALL_USERS=($(getent passwd {1000..60000} | grep -o "^[^:]*" | tr "\n" " "));
 
-				if [[ $FNRET -eq 1 ]]; then
-					userdel -r "${USER}" >> $LOG_FILE 2>&1;
+		ALLOWED_USERS=("${USERS[@]} ${ADMINS[@]}");
+		TOTAL=${#ALLOWED_USERS[@]};
 
-					logger "Removed user $USER";
+		yes_no "Should unauthorized users be removed?";
+
+		if [[ $FNRET -eq 1 ]]; then
+			for USER in "${ALL_USERS[@]}"; do
+				if [[ ! "${ADMINS[@]}" =~ "${USER}" && ! "${USERS[@]}" =~ "${USER}" && ! "${MAIN_USER}" == "${USER}" ]]; then
+					yes_no "Remove user $USER?";
+
+					if [[ $FNRET -eq 1 ]]; then
+						userdel -r "${USER}" >> $LOG_FILE 2>&1;
+
+						logger "Removed user $USER";
+					fi
 				fi
-			fi
-		done
-	fi
+			done
+		fi
 
-	yes_no "Should passwords be changed?";
+		yes_no "Should passwords be changed?";
 
-	if [[ $FNRET -eq 1 ]]; then
-		# Change passwords
+		if [[ $FNRET -eq 1 ]]; then
+			# Change passwords
 
-		REMOVE_SUDO_USER=($MAIN_USER);
-		ALLOWED_USERS=("${ALLOWED_USERS[@]/$REMOVE_SUDO_USER}");
+			REMOVE_SUDO_USER=($MAIN_USER);
+			ALLOWED_USERS=("${ALLOWED_USERS[@]/$REMOVE_SUDO_USER}");
 
-		random_password "16";
-		PASSWORD=$FNRET;
+			random_password "16";
+			PASSWORD=$FNRET;
 
-		logger "Using password: $PASSWORD";
+			logger "Using password: $PASSWORD";
 
-		echo $PASSWORD >> $PASSWORD_FILE;
+			echo $PASSWORD >> $PASSWORD_FILE;
 
-		for i in "${!ALLOWED_USERS[@]}"; do
-			USER=${ALLOWED_USERS[$i]};
+			for i in "${!ALLOWED_USERS[@]}"; do
+				USER=${ALLOWED_USERS[$i]};
 
-			yes $PASSWORD | passwd "$USER" >> $LOG_FILE 2>&1;
+				yes $PASSWORD | passwd "$USER" >> $LOG_FILE 2>&1;
 
-			logger "Strengthening passwords... ("$(($i + 1))"/${TOTAL})" 1;
-		done
+				logger "Strengthening passwords... ("$(($i + 1))"/${TOTAL})" 1;
+			done
 
-		echo "";
-	fi
+			echo "";
+		fi
 
-	yes_no "Should sudoers be corrected?";
+		yes_no "Should sudoers be corrected?";
 
-	if [[ $FNRET -eq 1 ]]; then
-		# Set sudo users
+		if [[ $FNRET -eq 1 ]]; then
+			# Set sudo users
 
-		for i in "${!ADMINS[@]}"; do
-			USER=${ADMINS[$i]};
+			for i in "${!ADMINS[@]}"; do
+				USER=${ADMINS[$i]};
 
-			yes $PASSWORD | sudo passwd "$USER" >> $LOG_FILE 2>&1;
-			usermod -aG sudo "$USER" > /dev/null 2>&1;
+				yes $PASSWORD | sudo passwd "$USER" >> $LOG_FILE 2>&1;
+				usermod -aG sudo "$USER" > /dev/null 2>&1;
 
-			logger "Adding admins to sudo... ("$(($i + 1))"/${#ADMINS[@]})" 1;
-		done
+				logger "Adding admins to sudo... ("$(($i + 1))"/${#ADMINS[@]})" 1;
+			done
 
-		echo "";
+			echo "";
 
-		for i in "${!USERS[@]}"; do
-			USER=${USERS[$i]}
+			for i in "${!USERS[@]}"; do
+				USER=${USERS[$i]}
 
-			yes $PASSWORD | sudo passwd "$USER" >> $LOG_FILE 2>&1;
-			deluser "$USER" sudo > /dev/null 2>&1;
+				yes $PASSWORD | sudo passwd "$USER" >> $LOG_FILE 2>&1;
+				deluser "$USER" sudo > /dev/null 2>&1;
 
-			logger "Removing users from sudo... ("$(($i + 1))"/${#USERS[@]})" 1;
-		done
+				logger "Removing users from sudo... ("$(($i + 1))"/${#USERS[@]})" 1;
+			done
 
-		echo "";
+			echo "";
+		fi
 	fi
 fi
 
@@ -612,7 +641,7 @@ logger "Fixing other file permissions...";
 
 update-rc.d autofs remove 2>/dev/null;
 chown root:root /boot/grub/grub.cfg 2>/dev/null;
-chmod 0400 /boot/grub/grub.cfg 2>/dev/null;
+chmod 0400 /boot/grub/grub.cfg >> $LOG_FILE 2>&1;
 
 for dir in $(cat /etc/passwd | /bin/egrep -v '(root|halt|sync|shutdown)' | awk -F: '($7 != "/usr/sbin/nologin" && $7 != "/bin/false" && $7 !="/nonexistent" ) { print $6 }'); do
 	if echo "$EXCEPTIONS" | grep -q "$dir"; then
@@ -623,19 +652,19 @@ for dir in $(cat /etc/passwd | /bin/egrep -v '(root|halt|sync|shutdown)' | awk -
 		dirperm=$(/bin/ls -ld "$dir" | cut -f1 -d" ");
 
 		if [[ $(echo "$dirperm" | cut -c6 ) != "-" ]]; then
-			chmod g-w "$dir";
+			chmod g-w "$dir" >> $LOG_FILE 2>&1;
 		fi
 
 		if [[ $(echo "$dirperm" | cut -c8 ) != "-" ]]; then
-			chmod o-r "$dir";
+			chmod o-r "$dir" >> $LOG_FILE 2>&1;
 		fi
 
 		if [[ $(echo "$dirperm" | cut -c9 ) != "-" ]]; then
-			chmod o-w "$dir";
+			chmod o-w "$dir" >> $LOG_FILE 2>&1;
 		fi
 
 		if [[ $(echo "$dirperm" | cut -c10 ) != "-" ]]; then
-			chmod o-x "$dir";
+			chmod o-x "$dir" >> $LOG_FILE 2>&1;
 		fi
 	fi
 done
@@ -646,11 +675,11 @@ for DIR in $(cat /etc/passwd | egrep -v '(root|halt|sync|shutdown)' | awk -F: '(
 			FILEPERM=$(ls -ld "$FILE" | cut -f1 -d" ");
 
 			if [[ $(echo "$FILEPERM" | cut -c6) != "-" ]]; then
-				chmod g-w "$FILE"
+				chmod g-w "$FILE" >> $LOG_FILE 2>&1;
 			fi
 
 			if [[ $(echo "$FILEPERM" | cut -c9) != "-" ]]; then
-				chmod o-w "$FILE"
+				chmod o-w "$FILE" >> $LOG_FILE 2>&1;
 			fi
 		fi
 	done
@@ -664,7 +693,7 @@ for DIR in $(cat /etc/passwd | egrep -v '(root|halt|sync|shutdown)' | awk -F: '(
 			file_has_correct_permissions "$FILE" $PERMISSIONS;
 
 			if [[ $FNRET -ne 0 ]]; then
-				chmod 600 "$FILE";
+				chmod 600 "$FILE" >> $LOG_FILE 2>&1;
 			fi
 		fi
 	done
@@ -675,7 +704,7 @@ cat /etc/passwd | awk -F: '{ print $1 " " $3 " " $6 }' | while read USER USERID 
 		OWNER=$(stat -L -c "%U" "$DIR");
 
 		if [[ "$OWNER" != "$USER" ]]; then
-			chown "$USER" "$DIR";
+			chown "$USER" "$DIR" >> $LOG_FILE 2>&1;
 		fi
 	fi
 done
@@ -923,7 +952,7 @@ logger "Purged ${#PURGE_PACKAGES[@]} packages";
 logger "Searching for games..." 1;
 
 ALL_GAMES=($(apt-cache search "game" | grep -o "^[^ ]*"));
-ALL_PACKAGES=($(dpkg -l | grep -Po "(?<=ii	)[^ ]*"));
+ALL_PACKAGES=($(dpkg -l | sed -E 's/ii\s+([^ ]*).*/\1/p'));
 
 GAMES=();
 
@@ -1102,7 +1131,6 @@ FILE='/etc/audit/audit.rules';
 logger "Applying auditd settings... (0/${#SYSCTL_EXP_RESULTS[@]})" 1;
 
 d_IFS=$IFS;
-IFS=$'\n';
 
 for i in ${!AUDIT_PARAMS[@]}; do
 	AUDIT_VALUE=${AUDIT_PARAMS[$i]};
@@ -1116,6 +1144,8 @@ for i in ${!AUDIT_PARAMS[@]}; do
 
 	logger "Applying auditd settings... ("$(($i + 1))"/${#AUDIT_PARAMS[@]}) - $AUDIT_VALUE" 1;
 done
+
+IFS=$'\n';
 
 SUDO_CMD='sudo -n';
 AUDIT_PARAMS1=$(find / -xdev \( -perm -4000 -o -perm -2000 \) -type f | awk '{print \
@@ -1306,7 +1336,7 @@ PERMISSIONS='644';
 file_has_correct_permissions $FILE $PERMISSIONS;
 
 if [[ $FNRET -ne 0 ]]; then
-	chmod 0$PERMISSIONS $FILE;
+	chmod 0$PERMISSIONS $FILE >> $LOG_FILE 2>&1;
 fi
 
 FILE='/etc/hosts.deny'
@@ -1330,7 +1360,7 @@ PERMISSIONS='644';
 file_has_correct_permissions $FILE $PERMISSIONS;
 
 if [[ $FNRET -ne 0 ]]; then
-	chmod 0$PERMISSIONS $FILE;
+	chmod 0$PERMISSIONS $FILE >> $LOG_FILE 2>&1;
 fi
 
 FILE='/etc/audit/auditd.conf';
@@ -1465,13 +1495,13 @@ for FILE in $FILES; do
 	file_has_correct_ownership "$FILE" $USER $GROUP;
 
 	if [[ $FNRET -ne 0 ]]; then
-		chown $USER:$GROUP "$FILE"
+		chown $USER:$GROUP "$FILE" >> $LOG_FILE 2>&1;
 	fi
 
 	file_has_correct_permissions "$FILE" $PERMISSIONS;
 
 	if [[ $FNRET -ne 0 ]]; then
-		chmod 0$PERMISSIONS "$FILE";
+		chmod 0$PERMISSIONS "$FILE" >> $LOG_FILE 2>&1;
 	fi
 done
 
@@ -1498,13 +1528,13 @@ fi
 file_has_correct_ownership $FILE $USER $GROUP;
 
 if [[ $FNRET -ne 0 ]]; then
-	chown $USER:$GROUP $FILE
+	chown $USER:$GROUP $FILE >> $LOG_FILE 2>&1;
 fi
 
 file_has_correct_permissions $FILE $PERMISSIONS;
 
 if [[ $FNRET -ne 0 ]]; then
-	chmod 0$PERMISSIONS $FILE;
+	chmod 0$PERMISSIONS $FILE >> $LOG_FILE 2>&1;
 fi
 
 FILE='/etc/cron.hourly';
@@ -1521,13 +1551,13 @@ fi
 file_has_correct_ownership $FILE $USER $GROUP;
 
 if [[ $FNRET -ne 0 ]]; then
-	chown $USER:$GROUP $FILE;
+	chown $USER:$GROUP $FILE >> $LOG_FILE 2>&1;
 fi
 
 file_has_correct_permissions $FILE $PERMISSIONS;
 
 if [[ $FNRET -ne 0 ]]; then
-	chmod 0$PERMISSIONS $FILE;
+	chmod 0$PERMISSIONS $FILE >> $LOG_FILE 2>&1;
 fi
 
 FILE='/etc/cron.daily';
@@ -1544,13 +1574,13 @@ fi
 file_has_correct_ownership $FILE $USER $GROUP;
 
 if [[ $FNRET -ne 0 ]]; then
-	chown $USER:$GROUP $FILE;
+	chown $USER:$GROUP $FILE >> $LOG_FILE 2>&1;
 fi
 
 file_has_correct_permissions $FILE $PERMISSIONS;
 
 if [[ $FNRET -ne 0 ]]; then
-	chmod 0$PERMISSIONS $FILE;
+	chmod 0$PERMISSIONS $FILE >> $LOG_FILE 2>&1;
 fi
 
 FILE='/etc/cron.weekly';
@@ -1567,13 +1597,13 @@ fi
 file_has_correct_ownership $FILE $USER $GROUP;
 
 if [[ $FNRET -ne 0 ]]; then
-	chown $USER:$GROUP $FILE
+	chown $USER:$GROUP $FILE >> $LOG_FILE 2>&1;
 fi
 
 file_has_correct_permissions $FILE $PERMISSIONS;
 
 if [[ $FNRET -ne 0 ]]; then
-	chmod 0$PERMISSIONS $FILE
+	chmod 0$PERMISSIONS $FILE >> $LOG_FILE 2>&1;
 fi
 
 FILE='/etc/cron.monthly';
@@ -1590,13 +1620,13 @@ fi
 file_has_correct_ownership $FILE $USER $GROUP;
 
 if [[ $FNRET -ne 0 ]]; then
-	chown $USER:$GROUP $FILE;
+	chown $USER:$GROUP $FILE >> $LOG_FILE 2>&1;
 fi
 
 file_has_correct_permissions $FILE $PERMISSIONS;
 
 if [[ $FNRET -ne 0 ]]; then
-	chmod 0$PERMISSIONS $FILE
+	chmod 0$PERMISSIONS $FILE >> $LOG_FILE 2>&1;
 fi
 
 FILE='/etc/cron.d';
@@ -1613,13 +1643,13 @@ fi
 file_has_correct_ownership $FILE $USER $GROUP;
 
 if [[ $FNRET -ne 0 ]]; then
-	chown $USER:$GROUP $FILE;
+	chown $USER:$GROUP $FILE >> $LOG_FILE 2>&1;
 fi
 
 file_has_correct_permissions $FILE $PERMISSIONS;
 
 if [[ $FNRET -ne 0 ]]; then
-	chmod 0$PERMISSIONS $FILE;
+	chmod 0$PERMISSIONS $FILE >> $LOG_FILE 2>&1;
 fi
 
 FILES_ABSENT='/etc/cron.deny /etc/at.deny';
@@ -1638,13 +1668,13 @@ for FILE in $FILES_PRESENT; do
 	file_has_correct_ownership "$FILE" $USER $GROUP;
 
 	if [[ $FNRET -ne 0 ]]; then
-		chown $USER:$GROUP "$FILE";
+		chown $USER:$GROUP "$FILE" >> $LOG_FILE 2>&1;
 	fi
 
 	file_has_correct_permissions "$FILE" $PERMISSIONS;
 
 	if [[ $FNRET -ne 0 ]]; then
-		chmod 0$PERMISSIONS "$FILE";
+		chmod 0$PERMISSIONS "$FILE" >> $LOG_FILE 2>&1;
 	fi
 done
 
@@ -1740,13 +1770,13 @@ fi
 file_has_correct_ownership $FILE $USER $GROUP;
 
 if [[ $FNRET -ne 0 ]]; then
-	chown $USER:$GROUP $FILE;
+	chown $USER:$GROUP $FILE >> $LOG_FILE 2>&1;
 fi
 
 file_has_correct_permissions $FILE $PERMISSIONS;
 
 if [[ $FNRET -ne 0 ]]; then
-	chmod 0$PERMISSIONS $FILE
+	chmod 0$PERMISSIONS $FILE >> $LOG_FILE 2>&1;
 fi
 
 PACKAGE='login';
@@ -1821,7 +1851,7 @@ done
 
 if [[ $SEARCH_RES -eq 0 ]]; then
 	touch $FILE;
-	chmod 644 $FILE;
+	chmod 644 $FILE >> $LOG_FILE 2>&1;
 	append_to_file $FILE "$PATTERN";
 fi
 
@@ -1840,13 +1870,13 @@ for FILE in $FILES; do
 	file_has_correct_ownership "$FILE" $USER $GROUP;
 
 	if [[ $FNRET -ne 0 ]]; then
-		chown $USER:$GROUP "$FILE"
+		chown $USER:$GROUP "$FILE" >> $LOG_FILE 2>&1;
 	fi
 
 	file_has_correct_permissions "$FILE" $PERMISSIONS;
 
 	if [[ $FNRET -ne 0 ]]; then
-		chmod 0$PERMISSIONS "$FILE"
+		chmod 0$PERMISSIONS "$FILE" >> $LOG_FILE 2>&1;
 	fi
 done
 
@@ -1867,7 +1897,7 @@ PERMISSIONS='644';
 file_has_correct_permissions $FILE $PERMISSIONS;
 
 if [[ $FNRET -ne 0 ]]; then
-	chmod 0$PERMISSIONS $FILE
+	chmod 0$PERMISSIONS $FILE >> $LOG_FILE 2>&1;
 fi
 
 FILE='/etc/shadow';
@@ -1876,7 +1906,7 @@ PERMISSIONS='640';
 file_has_correct_permissions $FILE $PERMISSIONS;
 
 if [[ $FNRET -ne 0 ]]; then
-	chmod 0$PERMISSIONS $FILE
+	chmod 0$PERMISSIONS $FILE >> $LOG_FILE 2>&1;
 fi
 
 FILE='/etc/group';
@@ -1885,7 +1915,7 @@ PERMISSIONS='644';
 file_has_correct_permissions $FILE $PERMISSIONS;
 
 if [[ $FNRET -ne 0 ]]; then
-	chmod 0$PERMISSIONS $FILE
+	chmod 0$PERMISSIONS $FILE >> $LOG_FILE 2>&1;
 fi
 
 FILE='/etc/passwd';
@@ -1895,7 +1925,7 @@ GROUP='root';
 file_has_correct_ownership $FILE $USER $GROUP;
 
 if [[ $FNRET -ne 0 ]]; then
-	chown $USER:$GROUP $FILE
+	chown $USER:$GROUP $FILE >> $LOG_FILE 2>&1;
 fi
 
 FILE='/etc/shadow';
@@ -1905,7 +1935,7 @@ GROUP='shadow';
 file_has_correct_ownership $FILE $USER $GROUP;
 
 if [[ $FNRET -ne 0 ]]; then
-	chown $USER:$GROUP $FILE
+	chown $USER:$GROUP $FILE >> $LOG_FILE 2>&1;
 fi
 
 FILE='/etc/group';
@@ -1915,7 +1945,7 @@ GROUP='root';
 file_has_correct_ownership $FILE $USER $GROUP;
 
 if [[ $FNRET -ne 0 ]]; then
-	chown $USER:$GROUP $FILE;
+	chown $USER:$GROUP $FILE >> $LOG_FILE 2>&1;
 fi
 
 #################################
@@ -2226,7 +2256,7 @@ fi
 
 ERRORS=0;
 
-for GROUP in $(cut -s -d: -f4 /etc/passwd | sort -u ); do
+for GROUP in $(cut -s -d: -f4 /etc/passwd | sort -u); do
 	if ! grep -q -P "^.*?:[^:]*:$GROUP:" /etc/group; then
 		ERRORS=$((ERRORS+1));
 	fi
@@ -2403,7 +2433,7 @@ done
 
 if [[ $SEARCH_RES -eq 0 ]]; then
 	touch $FILE;
-	chmod 644 $FILE;
+	chmod 644 $FILE >> $LOG_FILE 2>&1;
 	append_to_file $FILE "$PATTERN$VALUE";
 	append_to_file $FILE "readonly TMOUT";
 	append_to_file $FILE "export TMOUT";
@@ -2439,7 +2469,7 @@ done
 
 if [[ $SEARCH_RES -eq 0 ]]; then
 	touch $FILE;
-	chmod 644 $FILE;
+	chmod 644 $FILE >> $LOG_FILE 2>&1;
 	append_to_file $FILE '
 
 ACTION=="add", SUBSYSTEMS=="usb", TEST=="authorized_default", ATTR{authorized_default}="0"
@@ -2475,7 +2505,7 @@ if [[ FNRET -eq 1 ]]; then
 		"HostbasedAuthentication=no"
 		"IgnoreRhosts=yes"
 		"MaxAuthTries=4"
-		"ClientAliveInterval=$SSHD_TIMEOUT"
+		"ClientAliveInterval=10"
 		"ClientAliveCountMax=0"
 		"AllowUsers="
 		"AllowGroups=sshlogin"
