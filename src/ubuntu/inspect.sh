@@ -1,6 +1,16 @@
 #!/bin/bash
 
+# avoid recursively calling
+if [[ $1 -ne 1 ]]; then
+	# call this script, but ignore stderr
+	# warnings from bash 4.2+ are printed when null bytes
+	# are expanded in strings, which happens in this script
+	# due to the memory dump. we don't care about the
+	# warnings though, so they're safe to ignore here
+	/bin/bash ./$0 1 2>/dev/null;
 
+	exit;
+fi
 
 # get pid of CCSClient
 PID=$(ps -aux | grep CCSClient -m 1 | sed -E 's/root\s+([0-9]+).*/\1/p' | head -1);
@@ -42,6 +52,7 @@ cat core.$PID | tr '\n' ' ' | grep -Pao "(?<=<Check>     <CheckID>)\w+(?=<\/Chec
 
 echo "Found flags! Piped them to 'flags.txt'";
 echo "Attempting to find answers...";
+echo "";
 
 # loop through all lines in the flags.txt file
 while read line; do
@@ -50,7 +61,7 @@ while read line; do
 	# search for the flag in the file, NOT where we first found it,
 	# list the byte offset at the start of the line, and only show the first match
 	# then, only keep the numbers at the start of the line (the byte offset)
-	offset=$(cat core.$PID | grep -Pa "$line"'(?!<\/CheckID>)' --byte-offset -m 1 | grep -Pzo '^\d+' -m 1);
+	offset=$(cat core.$PID | grep -Pa "(?<=\0\0\0\0)$line(?=\0\0\0\0)" --byte-offset -m 1 | grep -Pzo '^\d+' -m 1);
 
 	# use 'tail' on the same memory dump file, but skip all of the bytes
 	# that come before the match from above
@@ -65,8 +76,14 @@ while read line; do
 	echo "$line: $match";
 done < flags.txt;
 
+echo "";
 echo "Possibly found some answers, they're most likely not 100% accurate.";
 echo "I would recommend looking in './core.$PID' for more information.";
 echo "NOTE: there are some unrelated answers in the file, but they're";
 echo "usually prefixed by (?i) since they all use the case-insensitive";
 echo "flag for their regular expressions.";
+echo "";
+echo "Here is a dump of (most) possible answers:";
+echo "";
+
+cat core.$PID | grep -Pao --color=never "(?<=\(\?i\))[^\0]+";
