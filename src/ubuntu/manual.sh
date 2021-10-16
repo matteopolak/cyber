@@ -1,3 +1,5 @@
+#!/bin/bash
+
 function update_time {
 	NOW="[$(date +"%T")]";
 }
