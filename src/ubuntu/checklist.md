@@ -28,6 +28,7 @@
 * Leverage **strace** to view system calls of the CCSClient process. Every 5 seconds, CCSClient runs a bunch of commands to see which points you have received. By looking at system calls, you can follow where they go and find points fairly easily. **This is not against the rules, even though it seems sketchy. Just don't stop the CCSClient process or it will stop running. If you accidentally stop it, you can restart it with `sudo /opt/CyberPatriot/CCSClient`**.
 	1. Search for the CCSClient process with `ps -aux | grep CCSClient -m 1`
 	2. Inspect the running process with `strace -p -s 128 <pid>`
-	3. If you want something more automatic, run `inspect.sh` :)
 
-* Use **gcore** to dump the memory of the CCSClient process. **It contains answers to the entire competition, just look closely!**
+* Use **gcore** to dump the memory of the CCSClient process.
+	1. Run `inspect.sh` and view printed response
+	2. Open up `core.<number>` for more detailed information

@@ -643,7 +643,7 @@ fi
 
 logger "Fixing other file permissions...";
 
-update-rc.d autofs remove 2>/dev/null;
+# update-rc.d autofs remove 2>/dev/null;
 chown root:root /boot/grub/grub.cfg 2>/dev/null;
 chmod 0400 /boot/grub/grub.cfg >> $LOG_FILE 2>&1;
 
@@ -959,26 +959,7 @@ logger "Purged ${#PURGE_PACKAGES[@]} packages";
 
 logger "Searching for games..." 1;
 
-ALL_GAMES=($(apt-cache search "game" | grep -o "^[^ ]*"));
-ALL_PACKAGES=($(dpkg -l | sed -E 's/ii\s+([^ ]*).*/\1/p'));
 
-GAMES=();
-
-for GAME in "${ALL_GAMES[@]}"; do
-	if [[ "${ALL_PACKAGES[@]}" =~ "${GAME}" ]]; then
-		GAMES+=($GAME)
-	fi
-done
-
-logger "Purging games... (0/${#GAMES[@]})" 1;
-
-for i in "${!GAMES[@]}"; do
-	GAME=${GAMES[$i]};
-
-	logger "Purging games... ("$(($i + 1))"/${#GAMES[@]}) - $GAME" 1;
-
-	apt_purge "$GAME";
-done
 
 logger "Purged ${#GAMES[@]} games";
 
@@ -2575,7 +2556,7 @@ if [[ FNRET -eq 1 ]]; then
 		"PASS_WARN_AGE=7"
 		"PASS_MIN_DAYS=7"
 		"PASS_MAX_DAYS=90"
-		"PASS_MIN_LEN 8"
+		"PASS_MIN_LEN=8"
 	);
 
 	logger "Updating OpenSSH...";
@@ -2603,6 +2584,7 @@ if [[ FNRET -eq 1 ]]; then
 		"/etc/ssh/sshd_config"
 		"/etc/ssh/sshd_config"
 		"/etc/ssh/sshd_config"
+		"/etc/login.defs"
 		"/etc/login.defs"
 		"/etc/login.defs"
 		"/etc/login.defs"
