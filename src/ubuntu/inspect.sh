@@ -15,6 +15,8 @@ fi
 # get pid of CCSClient
 PID=$(ps -aux | grep CCSClient -m 1 | sed -E 's/root\s+([0-9]+).*/\1/p' | head -1);
 
+rm core.$PID > /dev/null 2>&1;
+
 echo "Process ID of CCSClient is '$PID'";
 echo "Waiting for CCSClient to cycle...";
 
@@ -51,6 +53,10 @@ gcore $PID > /dev/null 2>&1;
 cat core.$PID | tr '\n' ' ' | grep -Pao "(?<=<Check>     <CheckID>)\w+(?=<\/CheckID>)" > flags.txt
 
 echo "Found flags! Piped them to 'flags.txt'";
+echo "";
+echo "NOTE: These flags are keys for points, you may be able to";
+echo "figure out what they mean by just looking at them";
+echo "";
 echo "Attempting to find answers...";
 echo "";
 
