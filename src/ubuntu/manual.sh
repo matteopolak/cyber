@@ -49,20 +49,20 @@ function yes_no {
 	FNRET=$RESULT;
 }
 
-find_by_type mp3
-find_by_type mov
-find_by_type mp4
-find_by_type avi
-find_by_type mpg
-find_by_type mpeg
-find_by_type flac
-find_by_type m4a
-find_by_type flv
-find_by_type ogg
-find_by_type gif
-find_by_type png
-find_by_type jpg
-find_by_type jpeg
+find_by_type mp3;
+find_by_type mov;
+find_by_type mp4;
+find_by_type avi;
+find_by_type mpg;
+find_by_type mpeg;
+find_by_type flac;
+find_by_type m4a;
+find_by_type flv;
+find_by_type ogg;
+find_by_type gif;
+find_by_type png;
+find_by_type jpg;
+find_by_type jpeg;
 
 echo "";
 echo "  REMINDER: Look at the checklist!!!";

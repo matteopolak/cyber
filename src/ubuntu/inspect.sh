@@ -50,7 +50,7 @@ gcore $PID > /dev/null 2>&1;
 #		a = treat binary file as text
 #		o = only show matches
 # move them all to flags.txt
-cat core.$PID | tr '\n' ' ' | grep -Pao "(?<=<Check>     <CheckID>)\w+(?=<\/CheckID>)" > flags.txt
+cat core.$PID | tr '\n' ' ' | grep -Pao "(?<=<Check>     <CheckID>)\w+(?=<\/CheckID>)" > flags.txt;
 
 echo "Found flags! Piped them to 'flags.txt'";
 echo "";
