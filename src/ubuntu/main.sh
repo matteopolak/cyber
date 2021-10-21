@@ -539,6 +539,7 @@ INSTALL_PACKAGES=(
 	"cron"
 	"p7zip-full"
 	"denyhosts"
+	"route"
 );
 
 logger "Installing packages... (0/${#INSTALL_PACKAGES[@]})" 1;
