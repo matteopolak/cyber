@@ -2666,6 +2666,28 @@ if [[ FNRET -eq 1 ]]; then
 
 	apt_install nginx;
 
+	sed -i "/server_tokens/d" /etc/nginx/nginx.conf >> $LOG_FILE 2>&1;
+	sed -i "/client_body_buffer_size/d" /etc/nginx/nginx.conf >> $LOG_FILE 2>&1;
+	sed -i "/client_header_buffer_size/d" /etc/nginx/nginx.conf >> $LOG_FILE 2>&1;
+	sed -i "/client_max_body_size/d" /etc/nginx/nginx.conf >> $LOG_FILE 2>&1;
+	sed -i "/large_client_header_buffers/d" /etc/nginx/nginx.conf >> $LOG_FILE 2>&1;
+	sed -i "/error_log/d" /etc/nginx/nginx.conf >> $LOG_FILE 2>&1;
+	sed -i "/ssl_protocols/d" /etc/nginx/nginx.conf >> $LOG_FILE 2>&1;
+	sed -i "/ssl_prefer_server_ciphers/d" /etc/nginx/nginx.conf >> $LOG_FILE 2>&1;
+
+	echo "server_tokens off" >> /etc/nginx/nginx.conf;
+	echo "client_body_buffer_size 1k" >> /etc/nginx/nginx.conf;
+	echo "client_header_buffer_size 1k" >> /etc/nginx/nginx.conf;
+	echo "client_max_body_size 1k" >> /etc/nginx/nginx.conf;
+	echo "large_client_header_buffers 2 1k" >> /etc/nginx/nginx.conf;
+	echo "error_log logs/error.log crit;" >> /etc/nginx/nginx.conf;
+	echo "add_header X-Frame-Options \"SAMEORIGIN\";" >> /etc/nginx/nginx.conf;
+	echo "add_header Strict-Transport-Security \"max-age=31536000; includeSubdomains; preload\";" >> /etc/nginx/nginx.conf;
+	echo "add_header Content-Security-Policy \"default-src 'self' http: https: data: blob: 'unsafe-inline'\" always;" >> /etc/nginx/nginx.conf;
+	echo "add_header X-XSS-Protection "1; mode=block";" >> /etc/nginx/nginx.conf;
+	echo "ssl_protocols TLSv1.2 TLSv1.3;" >> /etc/nginx/nginx.conf;
+	echo "ssl_prefer_server_ciphers on;" >> /etc/nginx/nginx.conf;
+
 	echo "";
 else
 	# nginx not required, remove it.
