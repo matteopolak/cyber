@@ -1,0 +1,48 @@
+ROUND 2: 2020
+
+7 | forensic 1: C598 6B4F 1257 FFA8 6632  CBA7 4618 1433 FBB7 5451
+7 | forensic 2: Launching a dream into space!
+7 | forensic 3: Left 73, Right 13, Left 65, Right 08
+3 | removed user sphiroth
+4 | removed user dyne
+2 | remove admin from zfair
+2 | change password for againsborough
+2 | change password for bwallace
+3 | set default maximum password age
+3 | stack and heap address space layout randomization enabled
+3 | ipv4 forwarding disabled
+3 | enable firewall
+3 | nginx block xss attacks for legacy browsers
+3 | nginx server tokens disabled
+3 | SNMP service remove
+2 | system automatically checks for updates daily
+2 | install important security updates
+2 | nginx updated
+2 | openssh updated
+3 | remove yersinia software
+3 | remove deluge software
+2 | firefox warns when sites try to install add-ons
+3 | ssh does not permit empty passwords
+3 | ssh protocol 1 disabled
+
+ROUND 2: 2020?
+
+forensics 1 & 2
+remove ballen
+remove sheogorath
+remove ulfric from admin
+change esbern password
+disable guest account
+create user belethor
+enable firewall
+disable/remove FTP
+enable automatic updates
+install updates from important security updates
+update openssh
+update libreoffice
+update firefox
+remove mp3 files
+remove ManaPlus
+remove Game Conqueror
+disable SSH root login
+update kernel to version 5

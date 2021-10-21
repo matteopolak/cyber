@@ -517,6 +517,7 @@ INSTALL_PACKAGES=(
 	"apparmor"
 	"apparmor-profiles"
 	"iptables"
+	"iptables-persistent",
 	"syslog-ng"
 	"tripwire"
 	"libpam-modules-bin"
@@ -2719,9 +2720,113 @@ logwatch >> $LOG_FILE 2>&1;
 logger "Setting up AppArmor...";
 apparmor_status > $APPARMOR_FILE 2>&1;
 
-logger "Configuring iptables...";
-iptables -A INPUT -p tcp --syn --dport 22 -m connlimit --connlimit-above 3 -j REJECT >> $LOG_FILE 2>&1;
-iptables -p tcp --syn --dport 80 -m connlimit --connlimit-above 20 --connlimit-mask 24 -j DROP >> $LOG_FILE 2>&1;
+# create a backup of iptables and ip6tables
+mkdir iptables >> $LOG_FILE 2>&1;
+iptables-save > iptables/rules_v4.backup >> $LOG_FILE 2>&1;
+ip6tables-save > iptables/rules_v6.backup >> $LOG_FILE 2>&1;
+
+NETWORK_INTERFACE=$(route | awk '/^default/{print $NF}');
+IPTABLES_SETTINGS=(
+	"-A INPUT -p tcp --syn --dport 22 -m connlimit --connlimit-above 3 -j REJECT"
+	"-p tcp --syn --dport 80 -m connlimit --connlimit-above 20 --connlimit-mask 24 -j DROP"
+	"-t nat -F"
+	"-t mangle -F"
+	"-t nat -X"
+	"-t mangle -X"
+	"-F"
+	"-X"
+	"-P INPUT DROP"
+	"-P FORWARD DROP"
+	"-P OUTPUT ACCEPT"
+	"-A INPUT -s 127.0.0.0/8 -i $NETWORK_INTERFACE -j DROP"
+	"-A INPUT -s 0.0.0.0/8 -j DROP"
+	"-A INPUT -s 100.64.0.0/10 -j DROP"
+	"-A INPUT -s 169.254.0.0/16 -j DROP"
+	"-A INPUT -s 192.0.0.0/24 -j DROP"
+	"-A INPUT -s 192.0.2.0/24 -j DROP"
+	"-A INPUT -s 198.18.0.0/15 -j DROP"
+	"-A INPUT -s 198.51.100.0/24 -j DROP"
+	"-A INPUT -s 203.0.113.0/24 -j DROP"
+	"-A INPUT -s 224.0.0.0/3 -j DROP"
+	"-A OUTPUT -d 127.0.0.0/8 -o $NETWORK_INTERFACE -j DROP"
+	"-A OUTPUT -d 0.0.0.0/8 -j DROP"
+	"-A OUTPUT -d 100.64.0.0/10 -j DROP"
+	"-A OUTPUT -d 169.254.0.0/16 -j DROP"
+	"-A OUTPUT -d 192.0.0.0/24 -j DROP"
+	"-A OUTPUT -d 192.0.2.0/24 -j DROP"
+	"-A OUTPUT -d 198.18.0.0/15 -j DROP"
+	"-A OUTPUT -d 198.51.100.0/24 -j DROP"
+	"-A OUTPUT -d 203.0.113.0/24 -j DROP"
+	"-A OUTPUT -d 224.0.0.0/3 -j DROP"
+	"-A OUTPUT -s 127.0.0.0/8 -o $NETWORK_INTERFACE -j DROP"
+	"-A OUTPUT -s 0.0.0.0/8 -j DROP"
+	"-A OUTPUT -s 100.64.0.0/10 -j DROP"
+	"-A OUTPUT -s 169.254.0.0/16 -j DROP"
+	"-A OUTPUT -s 192.0.0.0/24 -j DROP"
+	"-A OUTPUT -s 192.0.2.0/24 -j DROP"
+	"-A OUTPUT -s 198.18.0.0/15 -j DROP"
+	"-A OUTPUT -s 198.51.100.0/24 -j DROP"
+	"-A OUTPUT -s 203.0.113.0/24 -j DROP"
+	"-A OUTPUT -s 224.0.0.0/3 -j DROP"
+	"-A INPUT -d 127.0.0.0/8 -i $NETWORK_INTERFACE -j DROP"
+	"-A INPUT -d 0.0.0.0/8 -j DROP"
+	"-A INPUT -d 100.64.0.0/10 -j DROP"
+	"-A INPUT -d 169.254.0.0/16 -j DROP"
+	"-A INPUT -d 192.0.0.0/24 -j DROP"
+	"-A INPUT -d 192.0.2.0/24 -j DROP"
+	"-A INPUT -d 198.18.0.0/15 -j DROP"
+	"-A INPUT -d 198.51.100.0/24 -j DROP"
+	"-A INPUT -d 203.0.113.0/24 -j DROP"
+	"-A INPUT -d 224.0.0.0/3 -j DROP"
+	"-A INPUT -i lo -j ACCEPT"
+	"-A INPUT -p tcp --sport 80 -m conntrack --ctstate ESTABLISHED -j ACCEPT"
+	"-A INPUT -p tcp --sport 443 -m conntrack --ctstate ESTABLISHED -j ACCEPT"
+	"-A INPUT -p tcp --sport 53 -m conntrack --ctstate ESTABLISHED -j ACCEPT"
+	"-A INPUT -p udp --sport 53 -m conntrack --ctstate ESTABLISHED -j ACCEPT"
+	"-A OUTPUT -p tcp --dport 80 -m conntrack --ctstate NEW,ESTABLISHED -j ACCEPT"
+	"-A OUTPUT -p tcp --dport 443 -m conntrack --ctstate NEW,ESTABLISHED -j ACCEPT"
+	"-A OUTPUT -p tcp --dport 53 -m conntrack --ctstate NEW,ESTABLISHED -j ACCEPT"
+	"-A OUTPUT -p udp --dport 53 -m conntrack --ctstate NEW,ESTABLISHED -j ACCEPT"
+	"-A OUTPUT -o lo -j ACCEPT"
+	"-P OUTPUT DROP"
+);
+
+logger "Configuring iptables... (0/${#IPTABLES_SETTINGS[@]})" 1;
+
+for i in ${!IPTABLES_SETTINGS[@]}; do
+	SETTING=${IPTABLES_SETTINGS[$i]};
+	logger "Configuring iptables... ("$(($i + 1))"/${#IPTABLES_SETTINGS[@]}) - $SETTING" 1;
+
+	iptables $SETTING >> $LOG_FILE 2>&1;
+done
+
+IP6TABLES_SETTINGS=(
+	"-t nat -F"
+	"-t mangle -F"
+	"-t nat -X"
+	"-t mangle -X"
+	"-F"
+	"-X"
+	"-P INPUT DROP"
+	"-P FORWARD DROP"
+	"-P OUTPUT DROP"
+);
+
+logger "Configuring ip6tables... (0/${#IPTABLES_SETTINGS[@]})" 1;
+
+for i in ${!IPTABLES_SETTINGS[@]}; do
+	SETTING=${IPTABLES_SETTINGS[$i]};
+	logger "Configuring ip6tables... ("$(($i + 1))"/${#IPTABLES_SETTINGS[@]}) - $SETTING" 1;
+
+	iptables $SETTING >> $LOG_FILE 2>&1;
+done
+
+logger "Configured ${#IPTABLES_SETTINGS[@]} settings for iptables";
+
+# save  configuration settings
+mkdir /etc/iptables/
+iptables-save > /etc/iptables/rules.v4
+ip6tables-save > /etc/iptables/rules.v6
 
 # Update the distribution
 logger "Running full-upgrade..."
