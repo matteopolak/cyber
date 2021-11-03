@@ -544,6 +544,7 @@ INSTALL_PACKAGES=(
 	"p7zip-full"
 	"denyhosts"
 	"route"
+	"gdm3"
 );
 
 logger "Installing packages... (0/${#INSTALL_PACKAGES[@]})" 1;
