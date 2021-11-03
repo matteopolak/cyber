@@ -521,7 +521,7 @@ INSTALL_PACKAGES=(
 	"apparmor"
 	"apparmor-profiles"
 	"iptables"
-	"iptables-persistent",
+	"iptables-persistent"
 	"syslog-ng"
 	"tripwire"
 	"libpam-modules-bin"
