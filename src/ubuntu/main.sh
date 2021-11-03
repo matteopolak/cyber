@@ -399,6 +399,10 @@ echo "allow-guest=false" >> /etc/lightdm/lightdm.conf;
 
 # Enable UFW
 logger "Enabling uncomplicated firewall...";
+
+sed -i "/ipv6=/Id" /etc/default/ufw >> $LOG_FILE 2>&1;
+echo "ipv6=no" >> /etc/default/ufw;
+
 ufw enable >> $LOG_FILE 2>&1;
 
 # Update apt cache
@@ -818,6 +822,12 @@ SYSCTL_PARAMS=(
 	"net.ipv6.conf.all.accept_ra"
 	"net.ipv6.conf.default.accept_ra"
 	"fs.suid_dumpable"
+	"net.ipv4.tcp_max_syn_backlog"
+	"net.ipv4.tcp_syn_retries"
+	"net.ipv6.conf.all.accept_redirects"
+	"net.ipv6.conf.default.accept_redirects"
+	"kernel.kptr_restrict"
+	"vm.panic_on_oom"
 );
 
 SYSCTL_EXP_RESULTS=(
@@ -826,7 +836,7 @@ SYSCTL_EXP_RESULTS=(
 	"1" "65535" "65536" "2000 65000" "1" "1" "1" "1"
 	"0" "0" "0" "1" "1" "1" "1" "2" "1" "1" "8388608"
 	"8388608" "10240 87380 12582912" "10240 87380 12582912"
-	"5000" "1" "0" "0" "0"
+	"5000" "1" "0" "0" "0" "2048" "5" "0" "0" "2" "1"
 );
 
 logger "Applying sysctl settings... (0/${#SYSCTL_EXP_RESULTS[@]})" 1;
@@ -1119,7 +1129,7 @@ AUDIT_PARAMS=(
 
 FILE='/etc/audit/audit.rules';
 
-logger "Applying auditd settings... (0/${#SYSCTL_EXP_RESULTS[@]})" 1;
+logger "Applying auditd settings... (0/${#AUDIT_PARAMS[@]})" 1;
 
 d_IFS=$IFS;
 
@@ -1238,11 +1248,11 @@ logger "Updated ${#FIREFOX_USER_PREFERENCES[@]} Firefox settings";
 #
 #################################
 
-logger "Setting grub password...";
+# logger "Setting grub password...";
 
-GRUB_PASSWORD=$(yes "$GRUB_PASSWORD" | grub-mkpasswd-pbkdf2 | cut -c33- | tr -d $'\n');
+# GRUB_PASSWORD=$(yes "$GRUB_PASSWORD" | grub-mkpasswd-pbkdf2 | cut -c33- | tr -d $'\n');
 
-printf "#!/bin/sh\nexec tail -n +3 \$0\n\nset superusers=\"root\"\npassword_pbkdf2 root $GRUB_PASSWORD" > /etc/grub.d/40_custom;
+# printf "#!/bin/sh\nexec tail -n +3 \$0\n\nset superusers=\"root\"\npassword_pbkdf2 root $GRUB_PASSWORD" > /etc/grub.d/40_custom;
 
 #################################
 #
@@ -2866,6 +2876,11 @@ function display_time {
 	(( $M > 0 )) && printf '%dm ' $M
 	printf '%ds\n' $S
 }
+
+logger "Restarting services...";
+sysctl -p >> $LOG_FILE 2>&1;
+ufw --force enable >> $LOG_FILE 2>&1;
+service ssh restart >> $LOG_FILE 2>&1;
 
 echo "";
 printf "  This script executed in "
