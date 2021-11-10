@@ -1005,6 +1005,8 @@ MASTER_PATTERNS=(
 
 logger "Purging more package files... (0/${#MASTER_PATTERNS[@]})";
 
+d_IFS=$IFS;
+
 for i in ${!MASTER_PACKAGES[@]}; do
 	IFS=',';
 	PACKAGES=(${MASTER_PACKAGES[$i]});
@@ -1034,6 +1036,8 @@ for i in ${!MASTER_PACKAGES[@]}; do
 		fi
 	done
 done
+
+IFS=$d_IFS;
 
 logger "Purged ${#MASTER_PATTERNS[@]} package files";
 
