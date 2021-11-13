@@ -3829,15 +3829,6 @@ Configuration Windows10 {
 			ValueData = '1'
 		}
 
-		# 19.1.3.1 (L1) Ensure 'Enable screen saver' is set to 'Enabled'
-		Registry 'ScreenSaveActive' {
-			Ensure    = 'Present'
-			Key       = 'HKEY_CURRENT_USER\SOFTWARE\Policies\Microsoft\Windows\Control Panel\Desktop'
-			ValueName = 'ScreenSaveActive'
-			ValueType = 'String'
-			ValueData = '1'
-		}
-
 		# 19.1.3.2 (L1) Ensure 'Force specific screen saver: Screen saver executable name' is set to 'Enabled: scrnsave.scr'
 		Registry 'SCRNSAVE.EXE' {
 			Ensure    = 'Present'
