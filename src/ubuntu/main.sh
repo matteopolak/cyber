@@ -972,7 +972,26 @@ logger "Purged ${#PURGE_PACKAGES[@]} packages";
 
 logger "Searching for games..." 1;
 
+ALL_GAMES=($(apt-cache search "game" | grep -o "^[^ ]*"));
+ALL_PACKAGES=($(dpkg -l | sed -E 's/ii\s+([^ ]*).*/\1/p'));
 
+GAMES=();
+
+for GAME in "${ALL_GAMES[@]}"; do
+	if [[ "${ALL_PACKAGES[@]}" =~ "${GAME}" ]]; then
+		GAMES+=($GAME)
+	fi
+done
+
+logger "Purging games... (0/${#GAMES[@]})" 1;
+
+for i in "${!GAMES[@]}"; do
+	GAME=${GAMES[$i]};
+
+	logger "Purging games... ("$(($i + 1))"/${#GAMES[@]}) - $GAME" 1;
+
+	apt_purge "$GAME";
+done
 
 logger "Purged ${#GAMES[@]} games";
 
