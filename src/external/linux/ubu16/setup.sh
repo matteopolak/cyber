@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Install dependencies
-apt install ansible -y
+apt install ansible git -y
 
 mkdir /etc/ansible
 cd /etc/ansible
