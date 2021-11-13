@@ -6,7 +6,7 @@ apt install ansible git -y
 mkdir /etc/ansible
 cd /etc/ansible
 
-echo '- src: https://github.com/matteopolak/ubuntu1604_cis.git' >> /etc/ansible/requirements.yml;
+echo '- src: https://github.com/matteopolak/ubuntu1604_cis.git' >> /etc/ansible/requirements.yml
 
 ansible-galaxy install -p roles -r /etc/ansible/requirements.yml
 
