@@ -1,6 +1,6 @@
-install-module AuditPolicyDSC
-install-module ComputerManagementDsc
-install-module SecurityPolicyDsc
+Install-Module AuditPolicyDSC
+Install-Module ComputerManagementDSC
+Install-Module SecurityPolicyDSC
 
 ./WindowsServer2016.ps1
 
