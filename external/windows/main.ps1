@@ -1,5 +1,5 @@
-$readme = Select-String -Path "README.desktop" -Pattern '(?<=^Exec=x-www-browser \")([^\"]+)'
-Invoke-WebRequest -Uri $readme.matches.groups[1].ToString() -Outfile readme.txt
+$readme = Get-Content 'README.url' | Select -Index 1 | ForEach-Object { $_.SubString(4) }
+Invoke-WebRequest -Uri $readme -Outfile readme.txt
 
 Remove-Variable readme
 
