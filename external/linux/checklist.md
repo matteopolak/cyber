@@ -1,7 +1,10 @@
 ### Prohibited files
 * `.mp3`, `.mov`, `.mp4`, `.avi`, `.mpg`, `.mpeg`, `.flac`, `.m4a`, `.flv`, `.ogg`, `.gif`, `.png`, `.jpg`, `.jpeg`
 * How-to:
-    1. `find / -name "*.<extension>" 2>/dev/null`
+    Run the following command, replacing `txt` with the extension:
+    ```bash
+    find / -name "*.txt" 2>/dev/null
+    ```
 
 ### Prohibited applications
 * Hacking tools, games, malware

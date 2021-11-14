@@ -1,9 +1,10 @@
 ### Prohibited files
 * `.mp3`, `.mov`, `.mp4`, `.avi`, `.mpg`, `.mpeg`, `.flac`, `.m4a`, `.flv`, `.ogg`, `.gif`, `.png`, `.jpg`, `.jpeg`
 * How-to:
-    1. Open `File Explorer` and go to the root directory (usually `C:/`)
-    2. Search for `*.<extension>`
-    3. Delete unwanted files
+    * Run the following powershell command, replacing `txt` with the extension:
+    ```powershell
+    Get-ChildItem -Path .\ -Filter *.txt -Recurse -File -ErrorAction 'SilentlyContinue' | ForEach-Object { $_.FullName }
+    ```
 
 ### Prohibited applications
 * Hacking tools, games, malware
