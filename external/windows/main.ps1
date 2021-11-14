@@ -1,4 +1,4 @@
-$readme = Get-Content 'README.url' | Select -Index 1 | ForEach-Object { $_.SubString(4) }
+$readme = Get-Content 'README.url' | Select-Object -Index 1 | ForEach-Object { $_.SubString(4) }
 Invoke-WebRequest -Uri $readme -Outfile readme.txt
 
 Remove-Variable readme
