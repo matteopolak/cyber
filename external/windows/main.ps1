@@ -49,23 +49,13 @@ foreach ($user in $machine_users) {
 		Set-LocalUser -Password $password
 	# if they're not allowed on the machine
 	} else {
-		# remove them
-		Remove-LocalUser -Name $user.Name
+		$confirm = Read-Host -Prompt "Remove user $user? (y/N)"
+
+		if ($confirm -eq "y") {
+			# remove them
+			Remove-LocalUser -Name $user.Name
+		}
 	}
 }
 
 Remove-Variable machine_users, admins, users
-
-# password settings
-net accounts /MINPWLEN:10
-net accounts /MAXPWAGE:30
-net accounts /MINPWAGE:3
-net accounts /UNIQUEPW:5
-
-# enable Windows SmartScreen
-reg add “HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer” /v SmartScreenEnabled /t REG_SZ /d On
-
-# update Windows
-Import-Module PSWindowsUpdate
-Add-WUServiceManager -ServiceID 7971f918-a847-4430-9279-4a52d1efe18d -Confirm:$false
-Get-WUInstall -MicrosoftUpdate -AcceptAll -AutoReboot -confirm:$false
