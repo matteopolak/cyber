@@ -1,6 +1,11 @@
 ### To start...
 * Start all Windows updates and Service Packs
 
+### Manual tasks
+1. Open your respective CIS document(s) under the `cis` directory
+2. Search for `(Manual)`
+3. Complete all matched tasks
+
 ### Prohibited files
 * `.mp3`, `.mov`, `.mp4`, `.avi`, `.mpg`, `.mpeg`, `.flac`, `.m4a`, `.flv`, `.ogg`, `.gif`, `.png`, `.jpg`, `.jpeg`
 * How-to:
