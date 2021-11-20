@@ -20,3 +20,6 @@ sort tree.txt /o tree.txt
 
 :: `diff.txt` contains all file paths and files that are not
 :: present in a default installation of Windows Server 2016
+
+:: filter out the `diff.txt` file to remove useless data
+./filter-diff.bat
