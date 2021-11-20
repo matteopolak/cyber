@@ -8,7 +8,7 @@
 ### Ubuntu
 * `internal/ubuntu`
 * `internal/linux`
-* `external/linux/[ubu16, ubu18, ubu20]
+* `external/linux/[ubu16, ubu18, ubu20]`
 * `cis/ubuntu`
 
 ### Debian
