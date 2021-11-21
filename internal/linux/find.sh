@@ -33,5 +33,8 @@ tar -xzf "$TYPE.tar.gz"
 # -13 = print lines only present in second file
 comm -13 default.txt tree.txt > diff.txt;
 
+# filter out the `diff.txt` file to remove useless data
+bash ./diff-filter.sh
+
 # `diff.txt` contains all file paths and files that are not
 # present in a default installation of Ubuntu 20.04 or Debian 10

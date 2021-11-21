@@ -369,7 +369,7 @@ MAIN_USER=$FNRET;
 
 d_IFS=$IFS;
 IFS=$'\n';
-USERS_INPUT_RAW=($(more README.desktop | grep -oP "(?<=^Exec=x-www-browser \")([^\"]+)" | xargs wget -qO- | grep -Pzo "<b>Authorized Administrators(.|\n)*?(?=<\/pre)"));
+USERS_INPUT_RAW=($(more $(find /home -name "README.desktop") | grep -oP "(?<=^Exec=x-www-browser \")([^\"]+)" | xargs wget -qO- | grep -Pzo "<b>Authorized Administrators(.|\n)*?(?=<\/pre)"));
 is_admin=1;
 IFS=' ';
 
