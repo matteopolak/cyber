@@ -1,6 +1,4 @@
-$dir = Split-Path $MyInvocation.MyCommand.Path
-
-Push-Location $dir
+Split-Path $MyInvocation.MyCommand.Path | Push-Location
 
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 

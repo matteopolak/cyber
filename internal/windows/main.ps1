@@ -1,6 +1,4 @@
-$dir = Split-Path $MyInvocation.MyCommand.Path
-
-Push-Location $dir
+Split-Path $MyInvocation.MyCommand.Path | Push-Location
 
 $readme_path = Get-Childitem -Path \Users -Recurse -ErrorAction SilentlyContinue -File -Include README.url | Select-Object -First 1
 
@@ -11,7 +9,7 @@ if (!$readme_path) {
 $readme = Get-Content $readme_path.Name | Select-Object -Index 1 | ForEach-Object { $_.SubString(4) }
 Invoke-WebRequest -Uri $readme -Outfile readme.txt
 
-Remove-Variable readme, readme_path, dir
+Remove-Variable readme, readme_path
 
 $password = "mortem"
 
