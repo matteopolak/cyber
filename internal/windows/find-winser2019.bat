@@ -4,6 +4,8 @@
 :: sort default.txt /o default.txt
 :: tar -czf winser2019.tar.gz default.txt
 
+cd /D "%~dp0"
+
 :: pipe all file names to `tree.txt`
 where /R \ * > tree.txt
 
