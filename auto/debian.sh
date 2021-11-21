@@ -1,14 +1,19 @@
 #!/bin/bash
 
+back=$(pwd);
+
 # run filesystem diff script
 source ../internal/linux/find.sh
-
-# run CIS-compliant hardening script
-source ../external/linux/debian/setup.sh
+cd "$back";
 
 # run CyberPatriot-specific script
 # this one mostly works on Debian still
 source ../internal/ubuntu/main.sh
+cd "$back";
+
+# run CIS-compliant hardening script
+source ../external/linux/debian/setup.sh
+cd "$back";
 
 # make a directory to put results
 mkdir ../results
