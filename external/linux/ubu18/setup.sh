@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# move to script directory
+cd "$(dirname "$0")"
+
 # Install dependencies
 apt install ansible git -y
 

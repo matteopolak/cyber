@@ -4,6 +4,9 @@
 # sort -o default.txt{,}
 # tar -czf distro.tar.gz default.txt
 
+# move to script directory
+cd "$(dirname "$0")"
+
 TYPE="debian";
 
 if [[ $(uname -a) = *Ubuntu* ]]; then

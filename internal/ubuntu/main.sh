@@ -1,5 +1,8 @@
 #!/bin/bash
  
+# move to script directory
+cd "$(dirname "$0")"
+
 VERSION="1-UBUNTU";
 
 GRUB_PASSWORD="grubpassword";

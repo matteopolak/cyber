@@ -1,18 +1,13 @@
 #!/bin/bash
 
-back=$(pwd);
-
 # run filesystem diff script
-source ../internal/linux/find.sh
-cd "$back";
+bash ../internal/linux/find.sh
 
 # run CyberPatriot-specific script
-source ../internal/ubuntu/main.sh
-cd "$back";
+bash ../internal/ubuntu/main.sh
 
 # run CIS-compliant hardening script
-source ../external/linux/ubu18/setup.sh
-cd "$back";
+bash ../external/linux/ubu18/setup.sh
 
 # make a directory to put results
 mkdir ../results
