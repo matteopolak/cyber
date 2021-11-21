@@ -2623,6 +2623,7 @@ if [[ FNRET -eq 1 ]]; then
 		"/etc/ssh/sshd_config"
 		"/etc/ssh/sshd_config"
 		"/etc/ssh/sshd_config"
+		"/etc/ssh/sshd_config"
 		"/etc/login.defs"
 		"/etc/login.defs"
 		"/etc/login.defs"

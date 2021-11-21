@@ -14,4 +14,4 @@ mkdir ../results
 
 # all results use the `.txt` suffix, so it's
 # easy to move them all over at once
-mv ../**/*.txt ../results/
+find .. -name \*.txt -exec mv {} ../results \;
