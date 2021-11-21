@@ -17,16 +17,25 @@
 * `cis/debian`
 
 ### Windows 10
+```powershell
+Set-ExecutionPolicy -Scope LocalMachine -ExecutionPolicy Unrestricted -Force
+```
 * `internal/windows`
 * `external/windows/win10`
 * `cis/win10`
 
 ### Windows Server 2019
+```powershell
+Set-ExecutionPolicy -Scope LocalMachine -ExecutionPolicy Unrestricted -Force
+```
 * `internal/windows`
 * `external/windows/winser2019`
 * `cis/winser2019`
 
 ### Windows Server 2016
+```powershell
+Set-ExecutionPolicy -Scope LocalMachine -ExecutionPolicy Unrestricted -Force
+```
 * `internal/windows`
 * `external/windows/winser2016`
 * `cis/winser2016`
