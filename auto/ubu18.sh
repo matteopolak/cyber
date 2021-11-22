@@ -3,11 +3,11 @@
 # run filesystem diff script
 bash ../internal/linux/find.sh
 
-# run CyberPatriot-specific script
-bash ../internal/ubuntu/main.sh
-
 # run CIS-compliant hardening script
 bash ../external/linux/ubu18/setup.sh
+
+# run CyberPatriot-specific script
+bash ../internal/ubuntu/main.sh
 
 # make a directory to put results
 mkdir ../results
