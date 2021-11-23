@@ -407,6 +407,10 @@ sed -i "/ipv6=/Id" /etc/default/ufw >> $LOG_FILE 2>&1;
 echo "ipv6=no" >> /etc/default/ufw;
 
 ufw enable >> $LOG_FILE 2>&1;
+ufw deny 23 >> $LOG_FILE 2>&1;
+ufw deny 2049 >> $LOG_FILE 2>&1;
+ufw deny 515 >> $LOG_FILE 2>&1;
+ufw deny 111 >> $LOG_FILE 2>&1;
 
 # Update apt cache
 logger "Updating apt cache...";

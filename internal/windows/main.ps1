@@ -1,3 +1,8 @@
+Write-Host "Disabled the user account management script as I don't know what the format of the README shortucut is for Windows";
+Write-Host "If you're seeing this, PLEASE MAKE A COPY OF BOTH THE EXTENSION AND THE README HTML CONTENT ON YOUR LOCAL MACHINE"
+
+Exit;
+
 Split-Path $MyInvocation.MyCommand.Path | Push-Location
 
 $readme_path = Get-Childitem -Path \Users -Recurse -ErrorAction SilentlyContinue -File -Include README.url | Select-Object -First 1
