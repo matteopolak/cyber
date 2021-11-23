@@ -1,5 +1,5 @@
 ## Disclaimer
-This repository is made solely for the **Post Mortem** team for the [CyberPatriot](https://www.uscyberpatriot.org/) competition. **You are not allowed to use any of these tools for competing in the CyberPatriot competition to any degree. Usage of these scripts will result in immediate disqualification.**
+This repository is made solely for the **Post Mortem** [CyberPatriot](https://www.uscyberpatriot.org/) team. **You are not allowed to use any of these tools for competing in the CyberPatriot competition to any degree. Usage of these scripts will result in immediate disqualification.**
 
 | Folder | Description |
 | --- | --- |
