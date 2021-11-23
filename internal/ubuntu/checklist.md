@@ -32,3 +32,7 @@
 * Use **gcore** to dump the memory of the CCSClient process.
 	1. Run `inspect.sh` and view printed response
 	2. Open up `core.<number>` for more detailed information
+
+### Stuff to search
+* `/etc/sudoers.d/README`
+* `visudo`
