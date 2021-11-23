@@ -1,3 +1,6 @@
+## Disclaimer
+This repository is made solely for the **Post Mortem** team for the [CyberPatriot](https://www.uscyberpatriot.org/) competition. **You are not allowed to use any of these tools for competing in the CyberPatriot competition to any degree. Usage of these scripts will result in immediate disqualification.**
+
 | Folder | Description |
 | --- | --- |
 | `cis` | <u>**C**</u>entre for <u>**I**</u>nternet <u>**S**</u>ecurity-compliant documents for hardening multiple operating systems |
