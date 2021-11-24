@@ -22,10 +22,7 @@ This repository is made solely for the **Post Mortem** [CyberPatriot](https://ww
 * `cis/debian`
 
 ## Windows-based
-[x] CIS-compliant scripts<br>
-[ ] Covers manual portion of CIS<br>
-[x] ]Automatic user management<br>
-- Run the following command to enable PowerShell scripts
+* Run the following command to enable PowerShell scripts
 	`Set-ExecutionPolicy -Scope LocalMachine -ExecutionPolicy Unrestricted -Force`
 
 ### Windows 10
