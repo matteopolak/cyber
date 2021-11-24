@@ -22,10 +22,10 @@ This repository is made solely for the **Post Mortem** [CyberPatriot](https://ww
 * `cis/debian`
 
 ## Windows-based
-* Run the following command to enable PowerShell scripts
-	```powershell
-	Set-ExecutionPolicy -Scope LocalMachine -ExecutionPolicy Unrestricted -Force
-	```
+Run the following command to enable PowerShell scripts
+```powershell
+Set-ExecutionPolicy -Scope LocalMachine -ExecutionPolicy Unrestricted -Force
+```
 
 ### Windows 10
 * `internal/windows`
