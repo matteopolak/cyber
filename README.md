@@ -8,6 +8,8 @@ This repository is made solely for the **Post Mortem** [CyberPatriot](https://ww
 | `history` | An aggregation of data collected from previous competition rounds |
 | `internal` | Scripts made by the Post Mortem team |
 
+## Linux-based
+
 ### Ubuntu
 * `internal/ubuntu`
 * `internal/linux`
@@ -19,26 +21,24 @@ This repository is made solely for the **Post Mortem** [CyberPatriot](https://ww
 * `external/linux/debian`
 * `cis/debian`
 
+## Windows-based
+<input type="checkbox" disabled checked /> CIS-compliant scripts<br>
+<input type="checkbox" disabled /> Covers manual portion of CIS<br>
+<input type="checkbox" disabled checked /> Automatic user management<br>
+- Run the following command to enable PowerShell scripts
+	`Set-ExecutionPolicy -Scope LocalMachine -ExecutionPolicy Unrestricted -Force`
+
 ### Windows 10
-```powershell
-Set-ExecutionPolicy -Scope LocalMachine -ExecutionPolicy Unrestricted -Force
-```
 * `internal/windows`
 * `external/windows/win10`
 * `cis/win10`
 
 ### Windows Server 2019
-```powershell
-Set-ExecutionPolicy -Scope LocalMachine -ExecutionPolicy Unrestricted -Force
-```
 * `internal/windows`
 * `external/windows/winser2019`
 * `cis/winser2019`
 
 ### Windows Server 2016
-```powershell
-Set-ExecutionPolicy -Scope LocalMachine -ExecutionPolicy Unrestricted -Force
-```
 * `internal/windows`
 * `external/windows/winser2016`
 * `cis/winser2016`
