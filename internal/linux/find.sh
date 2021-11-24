@@ -1,6 +1,6 @@
 # create a new <distro>.tar.gz with the following commands:
 #
-# find / 2>/dev/null > default.txt
+# find / -printf "%m %p\n" 2>/dev/null > default.txt
 # sort -o default.txt{,}
 # tar -czf distro.tar.gz default.txt
 
@@ -27,11 +27,38 @@ find / 2>/dev/null > tree.txt;
 sort -o tree.txt{,};
 
 # unzip `<type>.tar.gz`
-tar -xzf "$TYPE.tar.gz"
+tar -xzf "$TYPE.tar.gz";
+
+# remove first 5 characters from each line (the file permissions)
+cut -c 5- default.txt > default_stripped.txt;
 
 # `default.txt` contains base files
 # -13 = print lines only present in second file
-comm -13 default.txt tree.txt > diff.txt;
+comm -13 default_stripped.txt tree.txt > diff.txt;
+common_entries=($(comm -12 default_stripped.txt tree.txt));
+
+# create an associative array
+declare -A file_permissions;
+
+# map file path to its permission
+while read line; do
+	# capture after first space
+	path=${line#* };
+	# capture until $path
+	permission"=${line%"${path}"}";
+
+	# map path to permission
+	file_permissions["${path}"]=${permission::-1};
+done < default.txt
+
+for entry in "${common_entries[@]}"; do
+	local_permission=$(stat -c "%a" "${entry}");
+	default_permission=${file_permissions["${entry}"]};
+
+	if [[ local_permission -ne default_permission ]]; then
+		echo "${default_permission} -> ${local_permission} @ ${entry}" >> diff-permissions.txt;
+	fi
+done
 
 # filter out the `diff.txt` file to remove useless data
 bash ./filter-diff.sh;
