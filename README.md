@@ -11,15 +11,17 @@ This repository is made solely for the **Post Mortem** [CyberPatriot](https://ww
 ## Linux-based
 
 ### Ubuntu
-* `internal/ubuntu`
-* `internal/linux`
-* `external/linux/[ubu16, ubu18, ubu20]`
-* `cis/ubuntu`
+* [`internal/ubuntu`](./internal/ubuntu)
+* [`internal/linux`](./internal/linux)
+* [`external/linux/ubu20`](./external/linux/ubu20)
+* [`external/linux/ubu18`](./external/linux/ubu18)
+* [`external/linux/ubu16`](./external/linux/ubu16)
+* [`cis/ubuntu`](./cis/ubuntu)
 
 ### Debian
-* `internal/linux`
-* `external/linux/debian`
-* `cis/debian`
+* [`internal/linux`](./internal/linux)
+* [`external/linux/debian`](./external/linux/debian)
+* [`cis/debian`](./cis/debian)
 
 ## Windows-based
 Run the following command to enable PowerShell scripts
@@ -28,16 +30,16 @@ Set-ExecutionPolicy -Scope LocalMachine -ExecutionPolicy Unrestricted -Force
 ```
 
 ### Windows 10
-* `internal/windows`
-* `external/windows/win10`
-* `cis/win10`
+* [`internal/windows`](./internal/windows)
+* [`external/windows/win10`](./external/windows/win10)
+* [`cis/win10`](./cis/win10)
 
 ### Windows Server 2019
-* `internal/windows`
-* `external/windows/winser2019`
-* `cis/winser2019`
+* [`internal/windows`](./internal/windows)
+* [`external/windows/winser2019`](./external/windows/winser2019)
+* [`cis/winser2019`](./cis/winser2019)
 
 ### Windows Server 2016
-* `internal/windows`
-* `external/windows/winser2016`
-* `cis/winser2016`
+* [`internal/windows`](./internal/windows)
+* [`external/windows/winser2016`](./external/windows/winser2016)
+* [`cis/winser2016`](./cis/winser2016)
