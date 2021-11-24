@@ -23,7 +23,9 @@ This repository is made solely for the **Post Mortem** [CyberPatriot](https://ww
 
 ## Windows-based
 * Run the following command to enable PowerShell scripts
-	`Set-ExecutionPolicy -Scope LocalMachine -ExecutionPolicy Unrestricted -Force`
+	```powershell
+	Set-ExecutionPolicy -Scope LocalMachine -ExecutionPolicy Unrestricted -Force
+	```
 
 ### Windows 10
 * `internal/windows`
