@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # create a new <distro>.tar.gz with the following commands:
 #
 # find / -printf "%m %p\n" 2>/dev/null > default.txt
