@@ -15,10 +15,12 @@ if [[ $(uname -a) = *Ubuntu* ]]; then
 	TYPE="ubuntu";
 fi
 
-echo "Comparing against files for: ${TYPE}";
+echo "Using template '${TYPE}'";
 
 # ensure `coreutils` is installed so we can use the `comm` command
-apt install coreutils -y;
+apt install coreutils -y 1>/dev/null;
+
+echo "Dumping local filesystem tree and sorting...";
 
 # pipe errors to `/dev/null`, as `/run/user/1000/gvfs` is restricted
 # to the owner only, so we can't read it (and don't need to)
@@ -32,7 +34,9 @@ sort -o tree.txt{,};
 tar -xzf "$TYPE.tar.gz";
 
 # remove first 5 characters from each line (the file permissions)
-sed 's/[^ ]* //' > default_stripped.txt;
+sed 's/[^ ]* //' default.txt > default_stripped.txt;
+
+sort -o default_stripped.txt{,};
 
 # `default.txt` contains base files
 # -13 = print lines only present in second file
@@ -42,25 +46,33 @@ common_entries=($(comm -12 default_stripped.txt tree.txt));
 # create an associative array
 declare -A file_permissions;
 
+echo "Mapping file paths to file permissions...";
+
 # map file path to its permission
 while read line; do
 	# capture after first space
-	path=${line#* };
+	path="${line#* }";
 	# capture until $path
-	permission"=${line%"${path}"}";
+	permission=${line%"${path}"};
 
 	# map path to permission
 	file_permissions["${path}"]=${permission::-1};
 done < default.txt
 
+echo "Comparing file permissions...";
+
 for entry in "${common_entries[@]}"; do
 	local_permission=$(stat -c "%a" "${entry}");
 	default_permission=${file_permissions["${entry}"]};
 
-	if [[ local_permission -ne default_permission ]]; then
+	if [[ ! -z $local_permission && $local_permission -ne $default_permission ]]; then
 		echo "${default_permission} -> ${local_permission} @ ${entry}" >> diff-permissions.txt;
 	fi
 done
+
+rm tree.txt;
+rm default.txt;
+rm default_stripped.txt;
 
 # filter out the `diff.txt` file to remove useless data
 bash ./filter-diff.sh;
