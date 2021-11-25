@@ -65,7 +65,7 @@ for entry in "${common_entries[@]}"; do
 	local_permission=$(stat -c "%a" "${entry}");
 	default_permission=${file_permissions["${entry}"]};
 
-	if [[ ! -z $local_permission && $local_permission -ne $default_permission ]]; then
+	if [[ ! -z $default_permission && $local_permission -ne $default_permission ]]; then
 		echo "${default_permission} -> ${local_permission} @ ${entry}" >> diff-permissions.txt;
 	fi
 done
