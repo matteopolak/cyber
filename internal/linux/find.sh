@@ -30,7 +30,7 @@ sort -o tree.txt{,};
 tar -xzf "$TYPE.tar.gz";
 
 # remove first 5 characters from each line (the file permissions)
-cut -c 5- default.txt > default_stripped.txt;
+sed 's/[^ ]* //' > default_stripped.txt;
 
 # `default.txt` contains base files
 # -13 = print lines only present in second file
