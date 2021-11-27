@@ -15,10 +15,10 @@ if [[ $(uname -a) = *Ubuntu* ]]; then
 	TYPE="ubuntu";
 fi
 
-echo "Comparing against files for: ${TYPE}";
+echo "Using template '${TYPE}'";
 
 # ensure `coreutils` is installed so we can use the `comm` command
-apt install coreutils parallel -y;
+apt install coreutils -y;
 
 # pipe errors to `/dev/null`, as `/run/user/1000/gvfs` is restricted
 # to the owner only, so we can't read it (and don't need to)
@@ -35,35 +35,42 @@ tar -xzf "$TYPE.tar.gz";
 sed 's/[^ ]* //' default.txt > default-stripped.txt;
 sort -o default-stripped.txt{,};
 
-bash ./filter-diff.sh default.txt > default-filter.txt;
-
 # `default.txt` contains base files
 # -13 = print lines only present in second file
 comm -13 default-stripped.txt tree.txt > diff.txt;
 
-function check {
-	local line=$1;
+# create a file with file permissions on each line
+xargs -0 stat -c "%a" < <(tr \\n \\0 <default-stripped.txt) 1>permissions.txt 2>&1
 
-	# capture after first @
-	local path=${line#*@};
+# merge the file permissions with the file names into one file
+paste -d ' ' permissions.txt default-stripped.txt > local.txt
 
-	# capture until $path
-	local permission="${line%"${path}"}";
-	local local_permission=$(stat -c "%a" "${path}" 2>/dev/null);
+# sort the file
+sort -o local.txt{,}
 
-	local permission=${permission::-1};
+# get all lines that are unique to file 1
+comm -23 default.txt local.txt > default-samepath.txt
 
-	# if the local permission isn't empty and is not equal to default
-	if [[ ! -z $local_permission && $local_permission -ne $permission ]]; then
-		echo "${permission} -> ${local_permission} @ ${path}" >> diff-permissions.txt;
-	fi
-}
+# remove permissions from file
+sed 's/[^ ]* //' default-samepath.txt > default-samepath-stripped.txt
 
-for line in $(tr ' ' '@' < default-filter.txt); do
-	check "${line}";
-done
+# remove paths from file
+sed 's/\s.*$//' default-samepath.txt > default-samepath-permissions.txt
 
-# rm tree.txt default.txt default-stripped.txt default-filter;
+# create another file with file permissions on each line, this time only on ones unique to default
+xargs -0 stat -c "%a" < <(tr \\n \\0 <default-samepath-stripped.txt) 1> permissions-samepath.txt 2>&1
+
+# merge local permissions with paths
+paste -d ' ' permissions-samepath.txt default-samepath-stripped.txt > local-samepath.txt
+
+# merge local permissions & paths with default permissions
+paste -d ' ' default-samepath-permissions.txt local-samepath.txt > diff-permissions-raw.txt
+
+# remove stat errors from files that don't exist on the system
+grep -v " stat:" < diff-permissions-raw.txt > diff-permissions.txt
+
+# cleanup
+rm tree.txt default.txt default-stripped.txt default-filter local.txt default-samepath.txt default-samepath-stripped.txt default-samepath-permissions.txt permissions-samepath.txt local-samepath.txt diff-permissions.raw
 
 # filter out the `diff.txt` file to remove useless data
 bash ./filter-diff.sh diff.txt > diff-filter.txt;
