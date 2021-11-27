@@ -80,3 +80,6 @@ tree --fromfile diff-filter.txt > diff-filter-tree.txt;
 
 # `diff.txt` contains all file paths and files that are not
 # present in a default installation of Ubuntu 20.04 or Debian 10
+
+# `diff-permissions.txt` contains all file paths and permissions that are not
+# identical in a default installation of Ubuntu 20.04 or Debian 10
