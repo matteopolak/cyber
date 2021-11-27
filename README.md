@@ -10,7 +10,12 @@ This repository is made solely for the **Post Mortem** [CyberPatriot](https://ww
 | `internal` | Scripts made by the Post Mortem team |
 
 ## Linux-based
-Run one of these commands depending on your distribution:
+Run the following command to fix line endings:
+```bash
+$ apt install dos2unix && dos2unix ./**/*.sh
+```
+
+Then run one of these commands depending on your distribution:
 
 ### Ubuntu
 * Ubuntu 16.04
@@ -38,7 +43,7 @@ Run one of these commands depending on your distribution:
 ## Windows-based
 Run the following command to enable PowerShell scripts:
 ```powershell
-Set-ExecutionPolicy -Scope LocalMachine -ExecutionPolicy Unrestricted -Force
+> Set-ExecutionPolicy -Scope LocalMachine -ExecutionPolicy Unrestricted -Force
 ```
 
 Then run one of these commands depending on your distribution:
