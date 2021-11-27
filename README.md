@@ -12,7 +12,8 @@ This repository is made solely for the **Post Mortem** [CyberPatriot](https://ww
 ## Linux-based
 Run the following command to fix line endings:
 ```bash
-$ apt install dos2unix && dos2unix ./**/*.sh
+$ shopt -s globstar
+$ dos2unix && dos2unix ./**/*.sh
 ```
 
 Then run one of these commands depending on your distribution:
