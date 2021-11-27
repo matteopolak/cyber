@@ -18,7 +18,7 @@ fi
 echo "Using template '${TYPE}'";
 
 # ensure `coreutils` is installed so we can use the `comm` command
-apt install coreutils -y;
+apt install coreutils tree -y;
 
 # pipe errors to `/dev/null`, as `/run/user/1000/gvfs` is restricted
 # to the owner only, so we can't read it (and don't need to)
@@ -75,6 +75,8 @@ rm tree.txt default.txt default-stripped.txt local.txt default-samepath.txt defa
 # filter out the `diff.txt` file to remove useless data
 bash ./filter-diff.sh diff.txt > diff-filter.txt;
 bash ./filter-diff.sh diff-permissions.txt > diff-permissions-filter.txt;
+
+tree --fromfile diff-filter.txt > diff-filter-tree.txt;
 
 # `diff.txt` contains all file paths and files that are not
 # present in a default installation of Ubuntu 20.04 or Debian 10
