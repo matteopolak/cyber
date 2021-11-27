@@ -380,7 +380,7 @@ Configuration WindowsServer2019 {
 			# 2.3.7.3 (L1) Ensure 'Interactive logon: Machine inactivity limit' is set to '900 or fewer second(s), but not 0'
 			Interactive_logon_Machine_inactivity_limit                                                                      = '900' 
 			# 2.3.7.4 (L1) Configure 'Interactive logon: Message text for users attempting to log on' 
-			# Interactive_logon_Message_text_for_users_attempting_to_log_on                                                   = 'This computer system is the property of Post Mortem and is for authorised use by employees and designated contractors only. By continuing to use this system you indicate your awareness of and consent to these terms and conditions of use.It is the users responsibility to LOG OFF IMMEDIATELY if you do not agree to the conditions stated in this notice.'
+			Interactive_logon_Message_text_for_users_attempting_to_log_on                                                   = 'This computer system is the property of Post Mortem and is for authorised use by employees and designated contractors only. By continuing to use this system you indicate your awareness of and consent to these terms and conditions of use.It is the users responsibility to LOG OFF IMMEDIATELY if you do not agree to the conditions stated in this notice.'
 			# 2.3.7.5 (L1) Configure 'Interactive logon: Message title for users attempting to log on'
 			#Interactive_logon_Message_title_for_users_attempting_to_log_on = '<Logon Warning>'
 			Interactive_logon_Message_title_for_users_attempting_to_log_on                                                  = 'Logon Warning'
@@ -1634,7 +1634,7 @@ Configuration WindowsServer2019 {
 		# 18.7.1.1 (L2) Ensure 'Turn off notifications network usage' is set to 'Enabled'
 		Registry 'notificationsnetworkusage' {
 			Ensure    = 'Present'
-			Key       = 'KEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\CurrentVersion\PushNotifications'
+			Key       = 'HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\CurrentVersion\PushNotifications'
 			ValueName = 'NoCloudApplicationNotification'
 			ValueType = 'DWord'
 			ValueData = '1'
@@ -1999,9 +1999,9 @@ Configuration WindowsServer2019 {
 			ValueType = 'DWord'
 			ValueData = '0'
 		}
-       
+
 		# 18.8.31.2 (L2) Ensure 'Allow upload of User Activities' is set to 'Disabled'
-		Registry 'AllowCrossDeviceClipboard' {
+		Registry 'UploadUserActivities' {
 			Ensure    = 'Present'
 			Key       = 'HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\System'
 			ValueName = 'UploadUserActivities'

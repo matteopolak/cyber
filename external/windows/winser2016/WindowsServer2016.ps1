@@ -381,7 +381,7 @@ Configuration WindowsServer2016 {
 			# 2.3.7.3 (L1) Ensure 'Interactive logon: Machine inactivity limit' is set to '900 or fewer second(s), but not 0'
 			Interactive_logon_Machine_inactivity_limit                                                                      = '900' 
 			# 2.3.7.4 (L1) Configure 'Interactive logon: Message text for users attempting to log on' 
-			# Interactive_logon_Message_text_for_users_attempting_to_log_on                                                   = 'This computer system is the property of Post Mortem and is for authorised use by employees and designated contractors only. By continuing to use this system you indicate your awareness of and consent to these terms and conditions of use.It is the users responsibility to LOG OFF IMMEDIATELY if you do not agree to the conditions stated in this notice.'
+			Interactive_logon_Message_text_for_users_attempting_to_log_on                                                   = 'This computer system is the property of Post Mortem and is for authorised use by employees and designated contractors only. By continuing to use this system you indicate your awareness of and consent to these terms and conditions of use.It is the users responsibility to LOG OFF IMMEDIATELY if you do not agree to the conditions stated in this notice.'
 			# 2.3.7.5 (L1) Configure 'Interactive logon: Message title for users attempting to log on'
 			#Interactive_logon_Message_title_for_users_attempting_to_log_on = '<Logon Warning>'
 			Interactive_logon_Message_title_for_users_attempting_to_log_on                                                  = 'Logon Warning'
