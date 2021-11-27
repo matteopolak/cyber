@@ -13,7 +13,7 @@ This repository is made solely for the **Post Mortem** [CyberPatriot](https://ww
 Run the following command to fix line endings:
 ```bash
 $ shopt -s globstar
-$ dos2unix && dos2unix ./**/*.sh
+$ dos2unix ./**/*.sh
 ```
 
 Then run one of these commands depending on your distribution:
