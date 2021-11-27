@@ -40,40 +40,41 @@ sort -o default-stripped.txt{,};
 comm -13 default-stripped.txt tree.txt > diff.txt;
 
 # create a file with file permissions on each line
-xargs -0 stat -c "%a" < <(tr \\n \\0 <default-stripped.txt) 1>permissions.txt 2>&1
+xargs -0 stat -c "%a" < <(tr \\n \\0 <default-stripped.txt) 1>permissions.txt 2>&1;
 
 # merge the file permissions with the file names into one file
-paste -d ' ' permissions.txt default-stripped.txt > local.txt
+paste -d ' ' permissions.txt default-stripped.txt > local.txt;
 
 # sort the file
-sort -o local.txt{,}
+sort -o local.txt{,};
 
 # get all lines that are unique to file 1
-comm -23 default.txt local.txt > default-samepath.txt
+comm -23 default.txt local.txt > default-samepath.txt;
 
 # remove permissions from file
-sed 's/[^ ]* //' default-samepath.txt > default-samepath-stripped.txt
+sed 's/[^ ]* //' default-samepath.txt > default-samepath-stripped.txt;
 
 # remove paths from file
-sed 's/\s.*$//' default-samepath.txt > default-samepath-permissions.txt
+sed 's/\s.*$//' default-samepath.txt > default-samepath-permissions.txt;
 
 # create another file with file permissions on each line, this time only on ones unique to default
-xargs -0 stat -c "%a" < <(tr \\n \\0 <default-samepath-stripped.txt) 1> permissions-samepath.txt 2>&1
+xargs -0 stat -c "%a" < <(tr \\n \\0 <default-samepath-stripped.txt) 1> permissions-samepath.txt 2>&1;
 
 # merge local permissions with paths
-paste -d ' ' permissions-samepath.txt default-samepath-stripped.txt > local-samepath.txt
+paste -d ' ' permissions-samepath.txt default-samepath-stripped.txt > local-samepath.txt;
 
 # merge local permissions & paths with default permissions
-paste -d ' ' default-samepath-permissions.txt local-samepath.txt > diff-permissions-raw.txt
+paste -d ' ' default-samepath-permissions.txt local-samepath.txt > diff-permissions-raw.txt;
 
 # remove stat errors from files that don't exist on the system
-grep -v " stat:" < diff-permissions-raw.txt > diff-permissions.txt
+grep -v " stat:" < diff-permissions-raw.txt > diff-permissions.txt;
 
 # cleanup
-rm tree.txt default.txt default-stripped.txt default-filter local.txt default-samepath.txt default-samepath-stripped.txt default-samepath-permissions.txt permissions-samepath.txt local-samepath.txt diff-permissions.raw
+rm tree.txt default.txt default-stripped.txt local.txt default-samepath.txt default-samepath-stripped.txt default-samepath-permissions.txt permissions-samepath.txt local-samepath.txt diff-permissions-raw.txt permissions.txt;
 
 # filter out the `diff.txt` file to remove useless data
 bash ./filter-diff.sh diff.txt > diff-filter.txt;
+bash ./filter-diff.sh diff-permissions.txt > diff-permissions-filter.txt;
 
 # `diff.txt` contains all file paths and files that are not
 # present in a default installation of Ubuntu 20.04 or Debian 10
