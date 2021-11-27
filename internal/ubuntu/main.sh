@@ -6,6 +6,7 @@ cd "$(dirname "$0")"
 VERSION="1-UBUNTU";
 
 GRUB_PASSWORD="grubpassword";
+USER_PASSWORD="P0stM0rtem!";
 
 SYSLOG_BASEDIR="/etc/syslog-ng";
 LOG_FILE="log_file.txt";
@@ -67,10 +68,12 @@ function logger {
 }
 
 function random_password {
-	local PASSWORD_LENGTH=$1;
-	local PASSWORD=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w "$PASSWORD_LENGTH" | head -n 1);
+	# local PASSWORD_LENGTH=$1;
+	# local PASSWORD=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w "$PASSWORD_LENGTH" | head -n 1);
 
-	FNRET=$PASSWORD;
+	# FNRET=$PASSWORD;
+
+	FNRET=$USER_PASSWORD;
 }
 
 function backup_file {
