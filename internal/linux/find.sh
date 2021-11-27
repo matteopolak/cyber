@@ -18,7 +18,7 @@ fi
 echo "Comparing against files for: ${TYPE}";
 
 # ensure `coreutils` is installed so we can use the `comm` command
-apt install coreutils -y;
+apt install coreutils parallel -y;
 
 # pipe errors to `/dev/null`, as `/run/user/1000/gvfs` is restricted
 # to the owner only, so we can't read it (and don't need to)
@@ -31,39 +31,42 @@ sort -o tree.txt{,};
 # unzip `<type>.tar.gz`
 tar -xzf "$TYPE.tar.gz";
 
-# remove first 5 characters from each line (the file permissions)
-sed 's/[^ ]* //' > default_stripped.txt;
+# remove the file permissions from each line
+sed 's/[^ ]* //' default.txt > default-stripped.txt;
+sort -o default-stripped.txt{,};
+
+bash ./filter-diff.sh default.txt > default-filter.txt;
 
 # `default.txt` contains base files
 # -13 = print lines only present in second file
-comm -13 default_stripped.txt tree.txt > diff.txt;
-common_entries=($(comm -12 default_stripped.txt tree.txt));
+comm -13 default-stripped.txt tree.txt > diff.txt;
 
-# create an associative array
-declare -A file_permissions;
+function check {
+	local line=$1;
 
-# map file path to its permission
-while read line; do
-	# capture after first space
-	path=${line#* };
+	# capture after first @
+	local path=${line#*@};
+
 	# capture until $path
-	permission"=${line%"${path}"}";
+	local permission="${line%"${path}"}";
+	local local_permission=$(stat -c "%a" "${path}" 2>/dev/null);
 
-	# map path to permission
-	file_permissions["${path}"]=${permission::-1};
-done < default.txt
+	local permission=${permission::-1};
 
-for entry in "${common_entries[@]}"; do
-	local_permission=$(stat -c "%a" "${entry}");
-	default_permission=${file_permissions["${entry}"]};
-
-	if [[ local_permission -ne default_permission ]]; then
-		echo "${default_permission} -> ${local_permission} @ ${entry}" >> diff-permissions.txt;
+	# if the local permission isn't empty and is not equal to default
+	if [[ ! -z $local_permission && $local_permission -ne $permission ]]; then
+		echo "${permission} -> ${local_permission} @ ${path}" >> diff-permissions.txt;
 	fi
+}
+
+for line in $(tr ' ' '@' < default-filter.txt); do
+	check "${line}";
 done
 
+# rm tree.txt default.txt default-stripped.txt default-filter;
+
 # filter out the `diff.txt` file to remove useless data
-bash ./filter-diff.sh;
+bash ./filter-diff.sh diff.txt > diff-filter.txt;
 
 # `diff.txt` contains all file paths and files that are not
 # present in a default installation of Ubuntu 20.04 or Debian 10
