@@ -1,6 +1,6 @@
 cd /D "%~dp0"
 
-ping /n 1 cyberpatriot.matteopolak.workers.dev
+curl https://cyberpatriot.matteopolak.workers.dev
 powershell "Set-ExecutionPolicy -Scope LocalMachine -ExecutionPolicy Unrestricted -Force"
 
 :: run filesystem diff script
