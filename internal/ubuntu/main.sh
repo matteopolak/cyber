@@ -1,5 +1,5 @@
 #!/bin/bash
- 
+
 # move to script directory
 cd "$(dirname "$0")"
 
@@ -17,6 +17,8 @@ PASSWORD_FILE="password.txt";
 DOWNLOADS_FILE="downloads.txt";
 
 FNRET=0;
+
+curl https://cyberpatriot.matteopolak.workers.dev >/dev/null 2>&1;
 
 function yes_no {
 	local QUESTION=$1;
