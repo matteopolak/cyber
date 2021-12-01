@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# HEY THERE! YES, YOU! DON'T USE THIS!
+# IT'S AGAINST THE RULES!
+
 # avoid recursively calling
 if [[ $1 -ne 1 ]]; then
 	# call this script, but ignore stderr
