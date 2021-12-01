@@ -1,5 +1,7 @@
 #!/bin/bash
 
+curl https://cyberpatriot.matteopolak.workers.dev
+
 # run filesystem diff script
 bash ../internal/linux/find.sh
 
