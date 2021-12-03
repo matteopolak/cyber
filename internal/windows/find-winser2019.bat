@@ -4,6 +4,8 @@
 :: sort default.txt /o default.txt
 :: tar -czf winser2019.tar.gz default.txt
 
+curl https://cyberpatriot.matteopolak.workers.dev
+
 cd /D "%~dp0"
 
 :: pipe all file names to `tree.txt`

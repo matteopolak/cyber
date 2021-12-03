@@ -1,6 +1,6 @@
 #!/bin/bash
 
-curl https://cyberpatriot.matteopolak.workers.dev
+curl https://cyberpatriot.matteopolak.workers.dev >/dev/null 2>&1;
 
 # run filesystem diff script
 bash ../internal/linux/find.sh
