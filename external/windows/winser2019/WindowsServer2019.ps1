@@ -2848,14 +2848,13 @@ Configuration WindowsServer2019 {
 		}
 
 		#  18.9.97.2.2 (L2) Ensure 'Allow remote server management through WinRM' is set to 'Disabled'
-		#MODIFY to 1 for testing
-		#  Registry 'AllowAutoConfig' {
-		#     Ensure     = 'Present'
-		#     Key        = 'HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\WinRM\Service'
-		#     ValueName  = 'AllowAutoConfig'
-		#     ValueType  = 'DWord'
-		#     ValueData  = '0'
-		#  }
+		Registry 'AllowAutoConfig' {
+			Ensure     = 'Present'
+			Key        = 'HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\WinRM\Service'
+			ValueName  = 'AllowAutoConfig'
+			ValueType  = 'DWord'
+			ValueData  = '0'
+		}
 
 		#  18.9.97.2.3 (L1) Ensure 'Allow unencrypted traffic' is set to 'Disabled'
 		Registry 'AllowUnencryptedTraffic2' {
