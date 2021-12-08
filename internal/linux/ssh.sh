@@ -1,6 +1,7 @@
 # create user 'ben'
 useradd -m ben;
 
+# set password of user 'ben' to 'root'
 yes 'root' | passwd ben;
 
 # install 'openssh-server' package
