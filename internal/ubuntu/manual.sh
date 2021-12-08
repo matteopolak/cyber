@@ -1,7 +1,5 @@
 #!/bin/bash
 
-curl https://cyberpatriot.matteopolak.workers.dev >/dev/null 2>&1;
-
 function update_time {
 	NOW="[$(date +"%T")]";
 }
