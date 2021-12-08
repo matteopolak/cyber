@@ -1,6 +1,5 @@
 cd /D "%~dp0"
 
-curl https://cyberpatriot.matteopolak.workers.dev
 powershell "Set-ExecutionPolicy -Scope LocalMachine -ExecutionPolicy Unrestricted -Force"
 
 :: run filesystem diff script
