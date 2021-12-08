@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # create user 'ben'
 useradd -m ben;
 
