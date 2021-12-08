@@ -23,6 +23,7 @@
 * Run `service lightdm restart` to apply LightDM changes
 
 ### Out of ideas?
+* Read the appropriate CIS benchmark in the [cis folder](../../cis)
 * Check out **runthough.md**
 
 ### Stuff to search
