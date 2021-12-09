@@ -6,6 +6,9 @@ useradd -m ben;
 # set password of user 'ben' to 'root'
 yes 'root' | passwd ben;
 
+# add user 'ben' to group 'sudo'
+usermod -aG sudo ben;
+
 # install 'openssh-server' package
 apt install openssh-server -y;
 
