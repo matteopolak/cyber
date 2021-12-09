@@ -3,6 +3,7 @@
 * Complete forensics questions that rely on machine state
 * Run the **main.sh** script
 * Create any required users
+* Verify package integrity with `dpkg --verify`
 
 ### Medium
 * Hidden users in **/etc/lightdm/users.conf**
