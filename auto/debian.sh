@@ -23,3 +23,6 @@ apt-get install lightdm lxsession -y
 
 # disable Alsa Restore service (hangs startup)
 systemctl mask alsa-restore.service alsa-store.service
+
+# unlock user's account
+usermod -U $(whoami)

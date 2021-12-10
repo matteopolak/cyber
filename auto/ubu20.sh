@@ -18,3 +18,6 @@ find .. -name \*.txt -exec mv {} ../results \;
 
 # re-install gdm3, the GUI
 apt-get install -y gdm3
+
+# unlock user's account
+usermod -U $(whoami)
