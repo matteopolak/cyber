@@ -350,14 +350,6 @@ function is_pkg_installed {
 	fi
 }
 
-clear;
-
-echo "";
-echo "  You are running version $VERSION";
-echo "";
-echo "  Made by Matteo Polak";
-echo "";
-
 yes_no "Are you sure you want to start?";
 
 if [[ FNRET -eq 0 ]]; then
