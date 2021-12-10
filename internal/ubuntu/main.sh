@@ -947,7 +947,6 @@ PURGE_PACKAGES=(
 	"pure-ftpd-mysql"
 	"pure-ftpd-postgresql"
 	"twoftpd-run"
-	"vsftpd"
 	"wzdftpd"
 	"bind9"
 	"unbound"
@@ -2762,6 +2761,30 @@ else
 	logger "Removing Samba...";
 	service samba stop >> $LOG_FILE 2>&1;
 	apt_purge samba;
+fi
+
+#################################
+#
+# vsftpd settings
+#
+#################################
+
+yes_no "Should vsftpd be maintained?";
+
+if [[ FNRET -eq 1 ]]; then
+	# Update Samba and apply safe configuration settings.
+
+	apt_install vsftpd;
+
+	# TODO: vsftpd config
+
+	echo "";
+else
+	# vsftpd not required, remove it.
+
+	logger "Removing vsftpd...";
+	service vsftpd stop >> $LOG_FILE 2>&1;
+	apt_purge vsftpd;
 fi
 
 #################################
