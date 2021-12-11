@@ -63,3 +63,6 @@ apt install gdm3 -y
 
 # unlock main user
 usermod -U $(whoami)
+
+# set user password
+yes 'root' | usermod -p $(whoami)
