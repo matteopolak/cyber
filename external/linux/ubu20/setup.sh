@@ -9,8 +9,9 @@ add-apt-repository --yes --update ppa:ansible/ansible
 # Install dependencies
 apt install ansible git openssh-server systemd-timesyncd -y
 
-# create '/etc/rsyslog.d/50-default.conf'
+# create config files
 touch /etc/rsyslog.d/50-default.conf
+touch /etc/ssh/sshd_config
 
 mkdir /etc/ansible
 cd /etc/ansible
