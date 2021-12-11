@@ -1,10 +1,5 @@
 #!/bin/bash
 
-if [[ $(whoami) != "root" ]]; then
-	echo "This script must be run as root"
-	exit 1;
-fi
-
 # move to script directory
 cd "$(dirname "$0")"
 
@@ -65,3 +60,6 @@ ansible-playbook /etc/ansible/harden.yml
 
 # re-install 'gdm3'
 apt install gdm3 -y
+
+# unlock main user
+usermod -U $(whoami)
