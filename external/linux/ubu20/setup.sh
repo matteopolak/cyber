@@ -3,6 +3,9 @@
 # move to script directory
 cd "$(dirname "$0")"
 
+# disable sleeping
+systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target
+
 # add ansible repo so we can use version 2.9+
 add-apt-repository --yes --update ppa:ansible/ansible
 
