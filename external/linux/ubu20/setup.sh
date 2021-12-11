@@ -22,7 +22,6 @@ cd /etc/ansible
 # set up configuration of roles
 cat > /etc/ansible/requirements.yml << EOF
 - src: https://github.com/matteopolak/ubuntu2004_cis.git
-- src: https://github.com/alivx/CIS-Ubuntu-20.04-Ansible
 - src: https://github.com/matteopolak/UBUNTU20-CIS
 EOF
 
@@ -48,15 +47,6 @@ cat > /etc/ansible/harden.yml << EOF
 
   roles:
     - UBUNTU20-CIS
-
-- name: Harden Server
-  hosts: localhost
-  connection: local
-  become: yes
-  ignore_errors: yes
-
-  roles:
-    - CIS-Ubuntu-20.04-Ansible
 EOF
 
 # start all scripts

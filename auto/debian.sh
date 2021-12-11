@@ -26,3 +26,5 @@ systemctl mask alsa-restore.service alsa-store.service
 
 # unlock user's account
 usermod -U $(whoami)
+
+# duplicity --no-encryption --full-if-older-than=1s / file:///backup
