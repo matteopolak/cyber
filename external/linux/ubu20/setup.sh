@@ -1,5 +1,10 @@
 #!/bin/bash
 
+if [[ $(whoami) != "root" ]]; then
+	echo "This script must be run as root"
+	exit 1;
+fi
+
 # move to script directory
 cd "$(dirname "$0")"
 
