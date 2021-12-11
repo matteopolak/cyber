@@ -31,7 +31,7 @@ cat > /etc/ansible/harden.yml << EOF
   hosts: localhost
   connection: local
   become: yes
-	ignore_errors: yes
+  ignore_errors: yes
 
   roles:
     - ubuntu2004_cis
@@ -40,7 +40,7 @@ cat > /etc/ansible/harden.yml << EOF
   hosts: localhost
   connection: local
   become: yes
-	ignore_errors: yes
+  ignore_errors: yes
 
   roles:
     - UBUNTU20-CIS
@@ -49,7 +49,7 @@ cat > /etc/ansible/harden.yml << EOF
   hosts: localhost
   connection: local
   become: yes
-	ignore_errors: yes
+  ignore_errors: yes
 
   roles:
     - CIS-Ubuntu-20.04-Ansible
