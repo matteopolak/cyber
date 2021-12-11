@@ -20,5 +20,15 @@ mv /usr /usr.bk
 /usr.bk/mv /srv /srv.bk
 /usr.bk/mv /var /var.bk
 
+mkdir /etc
+mkdir /usr
+mkdir /usr/lib
+
+cp /etc.bk/os-release /etc/os-release
+cp /usr.bk/lib/os-release /usr/lib/os-release
+
 # use the backup
 /bin.bak/tar -xzf --ignore-failed-read /content.tar.gz
+
+cp /etc.bk/os-release /etc/os-release
+cp /usr.bk/lib/os-release /usr/lib/os-release
