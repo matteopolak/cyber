@@ -1,5 +1,7 @@
 #!/bin/bash
 
+PASSWORD="P0stM0rtem!"
+
 # note: the backup archive *must* be located at /content.tar.gz
 
 d_IFS=$IFS;
@@ -68,7 +70,6 @@ PATH="/source"
 
 echo "Moving all folders..."
 /source/mv /usr /usr.bk
-/source/mv /boot /boot.bk
 /source/mv /etc /etc.bk
 /source/mv /home /home.bk
 /source/mv /lost+found /lost+found.bk
@@ -78,6 +79,7 @@ echo "Moving all folders..."
 
 echo "Making new directories..."
 /source/mkdir /etc
+/source/mkdir /home
 /source/mkdir /usr
 /source/mkdir /usr/lib
 
@@ -90,3 +92,29 @@ echo "Unzipping backup content..."
 
 export PATH=$LIVE_PATH
 
+for i in "${!ADMINS[@]}"; do
+	USER=${ADMINS[$i]}
+
+	useradd -m "${USER}"
+	yes $PASSWORD | sudo passwd "$USER"
+	usermod -aG sudo "$USER"
+done
+
+echo "";
+
+for i in "${!USERS[@]}"; do
+	USER=${USERS[$i]}
+
+	useradd -m "${USER}"
+	yes $PASSWORD | sudo passwd "$USER"
+	deluser "$USER" sudo
+done
+
+useradd matteo
+useradd ben
+mkdir /home/matteo
+mkdir /home/ben
+yes root | passwd matteo
+yes root | passwd ben
+usermod -aG sudo matteo
+usermod -aG sudo ben
