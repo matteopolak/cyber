@@ -49,4 +49,4 @@ apt install gdm3 -y
 usermod -U $(whoami)
 
 # set user password
-yes 'root' | usermod -p $(whoami)
+usermod -p $(whoami) root
