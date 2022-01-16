@@ -387,6 +387,19 @@ done
 
 IFS=$d_IFS;
 
+
+# Update apt cache
+logger "Updating apt cache...";
+apt_update;
+
+# Update packages
+logger "Updating apt packages...";
+apt_upgrade;
+
+logger "Fixing broken packages...";
+dpkg --configure -a;
+apt --fix-missing update;
+
 # Disable the root user
 logger "Disabling root user...";
 passwd -l root >> $LOG_FILE 2>&1;
@@ -406,14 +419,6 @@ ufw deny 23 >> $LOG_FILE 2>&1;
 ufw deny 2049 >> $LOG_FILE 2>&1;
 ufw deny 515 >> $LOG_FILE 2>&1;
 ufw deny 111 >> $LOG_FILE 2>&1;
-
-# Update apt cache
-logger "Updating apt cache...";
-apt_update;
-
-# Update packages
-logger "Updating apt packages...";
-apt_upgrade;
 
 #################################
 #
