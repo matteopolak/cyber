@@ -1,0 +1,1 @@
+"bin/procdump.exe" -accepteula -n 30 -s 1 CCSClient.exe
